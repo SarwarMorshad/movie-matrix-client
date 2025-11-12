@@ -52,9 +52,6 @@ const Home = () => {
       {/* Hero Section */}
       <HeroSection movies={topRatedMovies} />
 
-      {/* Statistics Section */}
-      <StatsSection stats={stats} />
-
       {/* Top Rated Movies Section */}
       <TopRatedMovies movies={topRatedMovies} />
 
@@ -63,6 +60,9 @@ const Home = () => {
 
       {/* Genre Section */}
       <GenreSection />
+
+      {/* Statistics Section */}
+      <StatsSection stats={stats} />
 
       {/* About Platform Section */}
       <AboutSection />

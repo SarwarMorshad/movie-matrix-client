@@ -7,6 +7,7 @@ import { MdMovie } from "react-icons/md";
 const Navbar = () => {
   const { user, logOut } = useContext(AuthContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const handleLogout = () => {
     logOut()
@@ -17,6 +18,10 @@ const Navbar = () => {
         console.error("Logout error:", error);
       });
   };
+
+  // Default avatar fallback
+  const defaultAvatar = "https://i.ibb.co/2FbxWkt/user.png";
+  const userAvatar = imageError ? defaultAvatar : user?.photoURL || defaultAvatar;
 
   const navLinks = (
     <>
@@ -88,7 +93,12 @@ const Navbar = () => {
               <div className="dropdown dropdown-end">
                 <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                   <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                    <img src={user.photoURL || "https://i.ibb.co/2FbxWkt/user.png"} alt={user.displayName} />
+                    <img
+                      src={userAvatar}
+                      alt={user.displayName || "User"}
+                      onError={() => setImageError(true)}
+                      referrerPolicy="no-referrer"
+                    />
                   </div>
                 </div>
                 <ul
@@ -96,10 +106,10 @@ const Navbar = () => {
                   className="menu menu-sm dropdown-content mt-3 z-[1] p-3 shadow-xl bg-movie-card rounded-box w-52 border border-white/10"
                 >
                   <li className="menu-title px-4 py-2">
-                    <span className="text-white font-semibold">{user.displayName}</span>
+                    <span className="text-white font-semibold">{user.displayName || "User"}</span>
                     <span className="text-gray-400 text-xs">{user.email}</span>
                   </li>
-                  <div className="divider my-1"></div>
+                  <li className="divider my-1"></li>
                   <li>
                     <Link to="/my-collection" className="text-white hover:text-primary">
                       <FiUser className="text-lg" />
@@ -133,7 +143,12 @@ const Navbar = () => {
             {user && (
               <div className="avatar">
                 <div className="w-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1">
-                  <img src={user.photoURL || "https://i.ibb.co/2FbxWkt/user.png"} alt={user.displayName} />
+                  <img
+                    src={userAvatar}
+                    alt={user.displayName || "User"}
+                    onError={() => setImageError(true)}
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
               </div>
             )}
@@ -153,7 +168,7 @@ const Navbar = () => {
               {user ? (
                 <>
                   <div className="text-white px-2">
-                    <p className="font-semibold">{user.displayName}</p>
+                    <p className="font-semibold">{user.displayName || "User"}</p>
                     <p className="text-gray-400 text-sm">{user.email}</p>
                   </div>
                   <button

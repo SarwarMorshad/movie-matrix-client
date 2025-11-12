@@ -2,16 +2,18 @@ import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
-import MovieCard from "../components/MovieCard";
 import LoadingSpinner from "../components/LoadingSpinner";
+import toast from "react-hot-toast";
 import { MdMovie, MdAdd } from "react-icons/md";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
-import Swal from "sweetalert2";
 
 const MyCollection = () => {
   const { user } = useContext(AuthContext);
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [movieToDelete, setMovieToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -26,60 +28,35 @@ const MyCollection = () => {
       setMovies(response.data);
     } catch (error) {
       console.error("Error fetching my movies:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to load your movies",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-      });
+      toast.error("Failed to load your movies");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (movieId, movieTitle) => {
-    const result = await Swal.fire({
-      title: "Delete Movie?",
-      text: `Are you sure you want to delete "${movieTitle}"?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#E50914",
-      cancelButtonColor: "#6B7280",
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "Cancel",
-      background: "#141414",
-      color: "#fff",
-    });
+  const openDeleteModal = (movieId, movieTitle) => {
+    setMovieToDelete({ id: movieId, title: movieTitle });
+    setShowDeleteModal(true);
+  };
 
-    if (result.isConfirmed) {
-      try {
-        await axios.delete(`http://localhost:3000/movies/${movieId}`);
+  const handleDelete = async () => {
+    if (!movieToDelete) return;
 
-        // Remove from local state
-        setMovies(movies.filter((movie) => movie._id !== movieId));
+    try {
+      setDeleting(true);
+      await axios.delete(`http://localhost:3000/movies/${movieToDelete.id}`);
 
-        Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          text: "Movie has been deleted successfully",
-          background: "#141414",
-          color: "#fff",
-          confirmButtonColor: "#E50914",
-          timer: 2000,
-        });
-      } catch (error) {
-        console.error("Error deleting movie:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Failed to delete movie",
-          background: "#141414",
-          color: "#fff",
-          confirmButtonColor: "#E50914",
-        });
-      }
+      // Remove from local state
+      setMovies(movies.filter((movie) => movie._id !== movieToDelete.id));
+
+      toast.success("Movie deleted successfully!");
+      setShowDeleteModal(false);
+      setMovieToDelete(null);
+    } catch (error) {
+      console.error("Error deleting movie:", error);
+      toast.error("Failed to delete movie");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -88,7 +65,7 @@ const MyCollection = () => {
   }
 
   return (
-    <div className="min-h-screen bg-base-100 py-12">
+    <div className="min-h-screen bg-base-100 max-w-11/12 mx-auto py-12">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12 animate-fadeIn">
@@ -155,7 +132,7 @@ const MyCollection = () => {
                         </button>
                       </Link>
                       <button
-                        onClick={() => handleDelete(movie._id, movie.title)}
+                        onClick={() => openDeleteModal(movie._id, movie.title)}
                         className="btn btn-sm bg-error hover:bg-red-600 text-white border-none flex-1"
                       >
                         <FiTrash2 />
@@ -184,6 +161,30 @@ const MyCollection = () => {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && movieToDelete && (
+        <div className="modal-backdrop" onClick={() => !deleting && setShowDeleteModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-2xl font-bold text-white mb-4">Delete Movie?</h3>
+            <p className="text-gray-400 mb-6">
+              Are you sure you want to delete "{movieToDelete.title}"? This action cannot be undone.
+            </p>
+            <div className="flex gap-4">
+              <button onClick={handleDelete} disabled={deleting} className="btn-danger flex-1">
+                {deleting ? <span className="loading loading-spinner loading-sm"></span> : "Yes, Delete"}
+              </button>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+                className="btn-secondary flex-1"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

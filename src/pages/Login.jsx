@@ -4,11 +4,11 @@ import { AuthContext } from "../context/AuthContext";
 import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { MdMovie } from "react-icons/md";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import axios from "axios";
 
 const Login = () => {
-  const { signInUser, signInWithGoogle, setUser } = useContext(AuthContext);
+  const { signInUser, signInWithGoogle } = useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const location = useLocation();
@@ -34,27 +34,11 @@ const Login = () => {
         photoURL: result.user.photoURL,
       });
 
-      Swal.fire({
-        icon: "success",
-        title: "Login Successful!",
-        text: "Welcome back to Movie Matrix",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-        timer: 2000,
-      });
-
+      toast.success("Login successful! Welcome back to Movie Matrix");
       navigate(from, { replace: true });
     } catch (error) {
       console.error("Login error:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Login Failed",
-        text: error.message || "Invalid email or password",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-      });
+      toast.error(error.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -73,27 +57,11 @@ const Login = () => {
         photoURL: result.user.photoURL,
       });
 
-      Swal.fire({
-        icon: "success",
-        title: "Login Successful!",
-        text: "Welcome to Movie Matrix",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-        timer: 2000,
-      });
-
+      toast.success("Login successful! Welcome to Movie Matrix");
       navigate(from, { replace: true });
     } catch (error) {
       console.error("Google login error:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Login Failed",
-        text: error.message || "Could not sign in with Google",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-      });
+      toast.error(error.message || "Could not sign in with Google");
     } finally {
       setLoading(false);
     }
@@ -109,7 +77,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-100 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-base-100 max-w-11/12 mx-auto px-4 py-12">
       <div className="w-full max-w-md">
         {/* Logo & Title */}
         <div className="text-center mb-8 animate-fadeIn">

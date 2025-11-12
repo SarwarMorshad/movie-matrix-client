@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock, FiUser, FiImage, FiEye, FiEyeOff } from "react-icons/fi";
 import { MdMovie } from "react-icons/md";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import axios from "axios";
 
 const Register = () => {
@@ -71,16 +71,7 @@ const Register = () => {
         photoURL,
       });
 
-      Swal.fire({
-        icon: "success",
-        title: "Registration Successful!",
-        text: "Welcome to Movie Matrix",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-        timer: 2000,
-      });
-
+      toast.success("Registration successful! Welcome to Movie Matrix");
       navigate("/");
     } catch (error) {
       console.error("Registration error:", error);
@@ -94,14 +85,7 @@ const Register = () => {
         errorMessage = "Password is too weak";
       }
 
-      Swal.fire({
-        icon: "error",
-        title: "Registration Failed",
-        text: errorMessage,
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-      });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -120,27 +104,11 @@ const Register = () => {
         photoURL: result.user.photoURL,
       });
 
-      Swal.fire({
-        icon: "success",
-        title: "Registration Successful!",
-        text: "Welcome to Movie Matrix",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-        timer: 2000,
-      });
-
+      toast.success("Registration successful! Welcome to Movie Matrix");
       navigate("/");
     } catch (error) {
       console.error("Google registration error:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Registration Failed",
-        text: error.message || "Could not register with Google",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-      });
+      toast.error(error.message || "Could not register with Google");
     } finally {
       setLoading(false);
     }
@@ -156,7 +124,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-100 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-base-100 max-w-11/12 mx-auto px-4 py-12">
       <div className="w-full max-w-md">
         {/* Logo & Title */}
         <div className="text-center mb-8 animate-fadeIn">

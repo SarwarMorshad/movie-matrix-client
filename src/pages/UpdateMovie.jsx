@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { MdMovie } from "react-icons/md";
 
@@ -26,14 +26,7 @@ const UpdateMovie = () => {
 
       // Check if user is owner
       if (user.email !== movieData.addedBy) {
-        Swal.fire({
-          icon: "error",
-          title: "Access Denied",
-          text: "You can only edit movies that you added",
-          background: "#141414",
-          color: "#fff",
-          confirmButtonColor: "#E50914",
-        });
+        toast.error("You can only edit movies that you added");
         navigate("/movies");
         return;
       }
@@ -41,14 +34,7 @@ const UpdateMovie = () => {
       setMovie(movieData);
     } catch (error) {
       console.error("Error fetching movie:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to load movie details",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-      });
+      toast.error("Failed to load movie details");
       navigate("/movies");
     } finally {
       setLoading(false);
@@ -77,28 +63,11 @@ const UpdateMovie = () => {
 
     try {
       await axios.put(`http://localhost:3000/movies/${id}`, updatedData);
-
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Movie updated successfully",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-        timer: 2000,
-      });
-
+      toast.success("Movie updated successfully!");
       navigate(`/movies/${id}`);
     } catch (error) {
       console.error("Error updating movie:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to update movie. Please try again.",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-      });
+      toast.error("Failed to update movie. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -113,7 +82,7 @@ const UpdateMovie = () => {
   }
 
   return (
-    <div className="min-h-screen bg-base-100 py-12">
+    <div className="min-h-screen bg-base-100 max-w-11/12 mx-auto py-12">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-10 animate-fadeIn">

@@ -4,7 +4,7 @@ import { FiHome } from "react-icons/fi";
 
 const ErrorPage = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-movie-dark px-4">
+    <div className="min-h-screen flex items-center justify-center bg-movie-dark max-w-11/12 mx-auto px-4">
       <div className="text-center space-y-6 max-w-lg">
         {/* Icon */}
         <div className="flex justify-center">

@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import { MdMovie } from "react-icons/md";
 
 const AddMovie = () => {
@@ -33,35 +33,18 @@ const AddMovie = () => {
 
     try {
       await axios.post("http://localhost:3000/movies", movieData);
-
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Movie added successfully",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-        timer: 2000,
-      });
-
+      toast.success("Movie added successfully!");
       navigate("/my-collection");
     } catch (error) {
       console.error("Error adding movie:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to add movie. Please try again.",
-        background: "#141414",
-        color: "#fff",
-        confirmButtonColor: "#E50914",
-      });
+      toast.error("Failed to add movie. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-base-100 py-12">
+    <div className="min-h-screen bg-base-100 max-w-11/12 mx-auto py-12 ">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-10 animate-fadeIn">
