@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { FiStar, FiCalendar, FiFilm, FiGlobe, FiEdit, FiTrash2 } from "react-icons/fi";
 import { MdMovie, MdPerson } from "react-icons/md";
 import useAxios from "../hooks/useAxios";
+import MovieReviews from "../components/MovieReviews";
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -157,6 +158,9 @@ const MovieDetails = () => {
             </div>
           </div>
         </div>
+      </div>
+      <div className="container mx-auto px-4 mt-16">
+        <MovieReviews movieId={id} />
       </div>
 
       {/* Delete Confirmation Modal */}
