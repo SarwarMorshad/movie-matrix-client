@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import axios from "axios";
 import LoadingSpinner from "../components/LoadingSpinner";
 import toast from "react-hot-toast";
 import { FiStar, FiCalendar, FiFilm, FiGlobe, FiEdit, FiTrash2 } from "react-icons/fi";
 import { MdMovie, MdPerson } from "react-icons/md";
+import useAxios from "../hooks/useAxios";
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -15,6 +15,7 @@ const MovieDetails = () => {
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const axiosInstance = useAxios();
 
   useEffect(() => {
     fetchMovieDetails();
@@ -23,7 +24,7 @@ const MovieDetails = () => {
   const fetchMovieDetails = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/movies/${id}`);
+      const response = await axiosInstance.get(`/movies/${id}`);
       setMovie(response.data);
     } catch (error) {
       console.error("Error fetching movie details:", error);
@@ -36,7 +37,7 @@ const MovieDetails = () => {
   const handleDelete = async () => {
     try {
       setDeleting(true);
-      await axios.delete(`http://localhost:3000/movies/${id}`);
+      await axiosInstance.delete(`/movies/${id}`);
       toast.success("Movie deleted successfully!");
       navigate("/movies");
     } catch (error) {

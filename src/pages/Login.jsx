@@ -5,7 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { MdMovie } from "react-icons/md";
 import toast from "react-hot-toast";
-import axios from "axios";
+import useAxios from "../hooks/useAxios";
 
 const Login = () => {
   const { signInUser, signInWithGoogle } = useContext(AuthContext);
@@ -13,6 +13,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const axiosInstance = useAxios();
 
   const from = location.state?.from?.pathname || "/";
 
@@ -69,7 +70,7 @@ const Login = () => {
 
   const saveUserToDatabase = async (userData) => {
     try {
-      await axios.post("http://localhost:3000/users", userData);
+      await axiosInstance.post("/users", userData);
     } catch (error) {
       console.error("Error saving user:", error);
       // Don't show error to user, as this is not critical

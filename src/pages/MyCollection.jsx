@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import axios from "axios";
 import LoadingSpinner from "../components/LoadingSpinner";
 import toast from "react-hot-toast";
 import { MdMovie, MdAdd } from "react-icons/md";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
+import useAxios from "../hooks/useAxios";
 
 const MyCollection = () => {
   const { user } = useContext(AuthContext);
@@ -14,6 +14,7 @@ const MyCollection = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [movieToDelete, setMovieToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const axiosInstance = useAxios();
 
   useEffect(() => {
     if (user) {
@@ -24,7 +25,7 @@ const MyCollection = () => {
   const fetchMyMovies = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/my-movies?email=${user.email}`);
+      const response = await axiosInstance.get(`/my-movies?email=${user.email}`);
       setMovies(response.data);
     } catch (error) {
       console.error("Error fetching my movies:", error);
@@ -44,7 +45,7 @@ const MyCollection = () => {
 
     try {
       setDeleting(true);
-      await axios.delete(`http://localhost:3000/movies/${movieToDelete.id}`);
+      await axiosInstance.delete(`/movies/${movieToDelete.id}`);
 
       // Remove from local state
       setMovies(movies.filter((movie) => movie._id !== movieToDelete.id));

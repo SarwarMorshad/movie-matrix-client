@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import axios from "axios";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { MdMovie } from "react-icons/md";
+import useAxios from "../hooks/useAxios";
 
 const UpdateMovie = () => {
   const { id } = useParams();
@@ -13,6 +13,7 @@ const UpdateMovie = () => {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const axiosInstance = useAxios();
 
   useEffect(() => {
     fetchMovie();
@@ -21,7 +22,7 @@ const UpdateMovie = () => {
   const fetchMovie = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/movies/${id}`);
+      const response = await axiosInstance.get(`/movies/${id}`);
       const movieData = response.data;
 
       // Check if user is owner
@@ -62,7 +63,7 @@ const UpdateMovie = () => {
     };
 
     try {
-      await axios.put(`http://localhost:3000/movies/${id}`, updatedData);
+      await axiosInstance.put(`/movies/${id}`, updatedData);
       toast.success("Movie updated successfully!");
       navigate(`/movies/${id}`);
     } catch (error) {

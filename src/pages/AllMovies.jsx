@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import MovieCard from "../components/MovieCard";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { FiSearch, FiFilter } from "react-icons/fi";
 import toast from "react-hot-toast";
+import useAxios from "../hooks/useAxios";
 
 const AllMovies = () => {
   const [movies, setMovies] = useState([]);
@@ -11,6 +11,7 @@ const AllMovies = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const axiosInstance = useAxios();
 
   // Filter states
   const [selectedGenres, setSelectedGenres] = useState([]);
@@ -45,7 +46,7 @@ const AllMovies = () => {
   const fetchMovies = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:3000/movies");
+      const response = await axiosInstance.get("/movies");
       setMovies(response.data);
     } catch (error) {
       console.error("Error fetching movies:", error);

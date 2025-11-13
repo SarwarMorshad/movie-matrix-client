@@ -5,7 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock, FiUser, FiImage, FiEye, FiEyeOff } from "react-icons/fi";
 import { MdMovie } from "react-icons/md";
 import toast from "react-hot-toast";
-import axios from "axios";
+import useAxios from "../hooks/useAxios";
 
 const Register = () => {
   const { createUser, updateUserProfile, signInWithGoogle, setUser } = useContext(AuthContext);
@@ -13,6 +13,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
+  const axiosInstance = useAxios();
 
   const validatePassword = (password) => {
     const hasUpperCase = /[A-Z]/.test(password);
@@ -116,7 +117,7 @@ const Register = () => {
 
   const saveUserToDatabase = async (userData) => {
     try {
-      await axios.post("http://localhost:3000/users", userData);
+      await axiosInstance.post("/users", userData);
     } catch (error) {
       console.error("Error saving user:", error);
       // Don't show error to user, as this is not critical

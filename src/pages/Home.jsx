@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import HeroSection from "../components/HeroSection";
 import StatsSection from "../components/StatsSection";
 import TopRatedMovies from "../components/TopRatedMovies";
@@ -7,12 +6,14 @@ import RecentMovies from "../components/RecentMovies";
 import GenreSection from "../components/GenreSection";
 import AboutSection from "../components/AboutSection";
 import LoadingSpinner from "../components/LoadingSpinner";
+import useAxios from "../hooks/useAxios";
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalMovies: 0, totalUsers: 0 });
   const [topRatedMovies, setTopRatedMovies] = useState([]);
   const [recentMovies, setRecentMovies] = useState([]);
+  const axiosInstance = useAxios();
 
   useEffect(() => {
     fetchHomeData();
@@ -24,10 +25,10 @@ const Home = () => {
 
       // Fetch all data in parallel
       const [statsMovies, statsUsers, topRated, recent] = await Promise.all([
-        axios.get("http://localhost:3000/stats/movies-count"),
-        axios.get("http://localhost:3000/stats/users-count"),
-        axios.get("http://localhost:3000/movies-top-rated"),
-        axios.get("http://localhost:3000/movies-recent"),
+        axiosInstance.get("/stats/movies-count"),
+        axiosInstance.get("/stats/users-count"),
+        axiosInstance.get("/movies-top-rated"),
+        axiosInstance.get("/movies-recent"),
       ]);
 
       setStats({
