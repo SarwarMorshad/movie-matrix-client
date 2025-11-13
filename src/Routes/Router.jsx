@@ -11,6 +11,9 @@ import MyCollection from "../pages/MyCollection";
 import MyWatchlist from "../pages/MyWatchlist";
 import ErrorPage from "../pages/ErrorPage";
 import PrivateRoute from "./PrivateRoute";
+import Profile from "../pages/Profile";
+import EditProfile from "../pages/EditProfile";
+import SubscriptionPlans from "../pages/SubscriptionPlans";
 
 const router = createBrowserRouter([
   {
@@ -73,6 +76,26 @@ const router = createBrowserRouter([
             <MyWatchlist />
           </PrivateRoute>
         ),
+      },
+      {
+        path: "/profile",
+        element: (
+          <PrivateRoute>
+            <Profile />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/edit-profile",
+        element: (
+          <PrivateRoute>
+            <EditProfile />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/plans",
+        element: <SubscriptionPlans></SubscriptionPlans>,
       },
     ],
   },

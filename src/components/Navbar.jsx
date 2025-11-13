@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { FiMenu, FiX, FiLogOut, FiHeart } from "react-icons/fi";
+import { FiMenu, FiX, FiLogOut, FiHeart, FiUser } from "react-icons/fi";
 import { MdMovie, MdVideoLibrary } from "react-icons/md";
 import { HiSparkles } from "react-icons/hi";
 import ThemeToggle from "./ThemeToggle";
@@ -165,6 +165,28 @@ const Navbar = () => {
                       Navigation
                     </p>
 
+                    {/* Profile */}
+                    <li className="mb-1">
+                      <Link
+                        to="/profile"
+                        className="group relative bg-gradient-to-r from-blue-500/10 to-blue-500/5 hover:from-blue-500/20 hover:to-blue-500/10 rounded-xl px-4 py-3 text-white hover:text-blue-400 transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-blue-500/20"
+                      >
+                        <div className="flex items-center gap-4">
+                          {/* Icon Badge */}
+                          <div className="w-11 h-11 rounded-xl bg-blue-500/20 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-md">
+                            <FiUser className="text-2xl text-blue-400" />
+                          </div>
+                          {/* Text */}
+                          <div className="flex-1">
+                            <p className="font-bold text-base">My Profile</p>
+                            <p className="text-xs text-gray-400">View your info</p>
+                          </div>
+                        </div>
+                        {/* Shine Effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                      </Link>
+                    </li>
+
                     {/* My Collection */}
                     <li className="mb-1">
                       <Link
@@ -246,12 +268,12 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center space-x-3">
                 <Link to="/login">
-                  <button className="btn btn-ghost text-white hover:text-primary hover:scale-105 transition-all duration-300">
+                  <button className="btn btn-outline text-white w-full hover:scale-105 transition-all duration-300">
                     Login
                   </button>
                 </Link>
                 <Link to="/register">
-                  <button className="btn bg-primary hover:bg-movie-accent-hover text-white border-none hover:scale-105 transition-all duration-300">
+                  <button className="btn btn-primary hover:bg-movie-accent-hover text-white border-none hover:scale-105 transition-all duration-300">
                     Register
                   </button>
                 </Link>
@@ -310,6 +332,15 @@ const Navbar = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Profile Button - Mobile */}
+                  <Link to="/profile" className="w-full block">
+                    <button className="btn bg-blue-500 hover:bg-blue-600 text-white w-full border-none">
+                      <FiUser className="text-lg" />
+                      View Profile
+                    </button>
+                  </Link>
+
                   <button
                     onClick={handleLogout}
                     className="btn bg-error hover:bg-red-600 text-white w-full border-none hover:scale-105 transition-transform duration-300"
@@ -326,7 +357,7 @@ const Navbar = () => {
                     </button>
                   </Link>
                   <Link to="/register" className="w-full">
-                    <button className="btn bg-primary hover:bg-movie-accent-hover text-white w-full border-none hover:scale-105 transition-all duration-300">
+                    <button className="btn btn-primary hover:bg-movie-accent-hover text-white w-full border-none hover:scale-105 transition-all duration-300">
                       Register
                     </button>
                   </Link>

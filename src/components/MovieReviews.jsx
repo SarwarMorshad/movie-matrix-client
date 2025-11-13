@@ -2,7 +2,6 @@ import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { FiStar, FiEdit2, FiTrash2, FiSend } from "react-icons/fi";
 import toast from "react-hot-toast";
-import axios from "axios";
 import useAxios from "../hooks/useAxios";
 
 const MovieReviews = ({ movieId }) => {
@@ -18,8 +17,6 @@ const MovieReviews = ({ movieId }) => {
   const [editingReview, setEditingReview] = useState(null);
   const [editHoverRating, setEditHoverRating] = useState(0);
   const axiosInstance = useAxios();
-
-  //   const API_URL = "http://localhost:3000";
 
   // Fetch reviews
   useEffect(() => {
@@ -321,13 +318,13 @@ const MovieReviews = ({ movieId }) => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleUpdateReview(review._id)}
-                        className="btn btn-sm bg-primary text-white hover:bg-red-700 border-none"
+                        className="btn btn-sm btn-primary text-white hover:bg-red-700 border-none"
                       >
                         Save
                       </button>
                       <button
                         onClick={() => setEditingReview(null)}
-                        className="btn btn-sm btn-ghost text-gray-400 hover:text-white hover:bg-base-300"
+                        className="btn btn-sm btn-outline text-gray-400 hover:text-white hover:bg-base-300"
                       >
                         Cancel
                       </button>

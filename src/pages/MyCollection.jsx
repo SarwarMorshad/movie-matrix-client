@@ -127,14 +127,14 @@ const MyCollection = () => {
                     {/* Action Buttons */}
                     <div className="flex gap-2">
                       <Link to={`/update-movie/${movie._id}`} className="flex-1">
-                        <button className="btn btn-sm bg-secondary hover:bg-amber-600 text-white border-none w-full">
+                        <button className="btn btn-sm btn-outline hover:bg-amber-600 text-white  w-full">
                           <FiEdit />
                           Edit
                         </button>
                       </Link>
                       <button
                         onClick={() => openDeleteModal(movie._id, movie.title)}
-                        className="btn btn-sm bg-error hover:bg-red-600 text-white border-none flex-1"
+                        className="btn btn-sm btn-primary hover:bg-red-600 text-white border-none flex-1"
                       >
                         <FiTrash2 />
                         Delete
