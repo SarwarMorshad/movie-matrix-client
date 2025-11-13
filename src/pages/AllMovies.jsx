@@ -120,10 +120,10 @@ const AllMovies = () => {
         <div className="text-center mb-8">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="btn-secondary inline-flex items-center gap-2"
+            className="btn btn-primary  inline-flex items-center gap-2"
           >
             <FiFilter className="text-xl" />
-            {showFilters ? "Hide Filters" : "Show Advanced Filters"}
+            {showFilters ? "Hide Filters" : "Advanced Filters"}
           </button>
         </div>
 

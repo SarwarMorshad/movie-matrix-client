@@ -73,7 +73,7 @@ const MovieCard = ({ movie }) => {
 
           {/* Hover Content */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button className="btn bg-primary hover:bg-movie-accent-hover text-white border-none">
+            <button className="btn bg-primary hover:bg-movie-accent-hover text-white border-none w-6/12">
               <MdMovie className="text-xl" />
               View Details
             </button>
