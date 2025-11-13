@@ -1,11 +1,65 @@
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import { FiStar, FiCalendar } from "react-icons/fi";
-import { MdMovie } from "react-icons/md";
+import { AuthContext } from "../context/AuthContext";
+import { FiStar, FiCalendar, FiHeart } from "react-icons/fi";
+import { MdMovie, MdFavorite } from "react-icons/md";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const MovieCard = ({ movie }) => {
+  const { user } = useContext(AuthContext);
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const [adding, setAdding] = useState(false);
+
+  const addToWatchlist = async (e) => {
+    e.preventDefault(); // Prevent link navigation
+    e.stopPropagation();
+
+    if (!user) {
+      toast.error("Please login to add to watchlist");
+      return;
+    }
+
+    setAdding(true);
+    try {
+      await axios.post("http://localhost:3000/watchlist", {
+        email: user.email,
+        movieId: movie._id,
+      });
+      setIsInWatchlist(true);
+      toast.success("Added to watchlist!");
+    } catch (error) {
+      console.error("Error adding to watchlist:", error);
+      if (error.response?.status === 409) {
+        toast.error("Already in watchlist");
+        setIsInWatchlist(true);
+      } else {
+        toast.error("Failed to add to watchlist");
+      }
+    } finally {
+      setAdding(false);
+    }
+  };
+
   return (
     <Link to={`/movies/${movie._id}`}>
-      <div className="card-movie group">
+      <div className="card-movie group relative">
+        {/* Watchlist Button - Floating */}
+        {user && (
+          <button
+            onClick={addToWatchlist}
+            disabled={adding || isInWatchlist}
+            className={`absolute top-3 left-3 z-10 btn btn-sm btn-circle ${
+              isInWatchlist
+                ? "bg-primary text-white"
+                : "bg-black/70 backdrop-blur-sm text-white hover:bg-primary"
+            } border-none transition-all`}
+            title={isInWatchlist ? "In watchlist" : "Add to watchlist"}
+          >
+            {isInWatchlist ? <MdFavorite className="text-lg" /> : <FiHeart className="text-lg" />}
+          </button>
+        )}
+
         {/* Poster Image */}
         <div className="relative overflow-hidden aspect-[2/3]">
           <img
