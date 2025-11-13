@@ -3,7 +3,7 @@ import { MdLocalMovies, MdArrowBack } from "react-icons/md";
 
 const MovieNotFound = () => {
   return (
-    <div className="min-h-screen bg-base-100 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-base-100 flex items-center justify-center px-4 container mx-auto">
       <div className="text-center max-w-md animate-fadeIn">
         {/* Movie Icon */}
         <div className="mb-8 flex justify-center">

@@ -6,6 +6,7 @@ import { HiSparkles } from "react-icons/hi";
 import toast from "react-hot-toast";
 import { Link, Navigate } from "react-router-dom";
 import useAxios from "../hooks/useAxios";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
@@ -71,6 +72,11 @@ const Profile = () => {
     return <Navigate to="/login" replace />;
   }
 
+  // Show centered loading spinner
+  if (loading) {
+    return <LoadingSpinner center={true} />;
+  }
+
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Profile Header */}
@@ -133,11 +139,7 @@ const Profile = () => {
             <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center">
               <MdMovie className="text-3xl text-primary" />
             </div>
-            {loading ? (
-              <span className="loading loading-spinner text-primary"></span>
-            ) : (
-              <span className="text-4xl font-bold text-white">{stats.moviesAdded}</span>
-            )}
+            <span className="text-4xl font-bold text-white">{stats.moviesAdded}</span>
           </div>
           <h3 className="text-white font-semibold text-lg mb-1">Movies Added</h3>
           <p className="text-gray-400 text-sm">Your contributions</p>
@@ -149,11 +151,7 @@ const Profile = () => {
             <div className="w-14 h-14 rounded-xl bg-secondary/20 flex items-center justify-center">
               <FiHeart className="text-3xl text-secondary" />
             </div>
-            {loading ? (
-              <span className="loading loading-spinner text-secondary"></span>
-            ) : (
-              <span className="text-4xl font-bold text-white">{stats.watchlist}</span>
-            )}
+            <span className="text-4xl font-bold text-white">{stats.watchlist}</span>
           </div>
           <h3 className="text-white font-semibold text-lg mb-1">Watchlist</h3>
           <p className="text-gray-400 text-sm">Movies to watch</p>
@@ -165,11 +163,7 @@ const Profile = () => {
             <div className="w-14 h-14 rounded-xl bg-yellow-500/20 flex items-center justify-center">
               <FiStar className="text-3xl text-yellow-400" />
             </div>
-            {loading ? (
-              <span className="loading loading-spinner text-yellow-400"></span>
-            ) : (
-              <span className="text-4xl font-bold text-white">{stats.reviewsGiven}</span>
-            )}
+            <span className="text-4xl font-bold text-white">{stats.reviewsGiven}</span>
           </div>
           <h3 className="text-white font-semibold text-lg mb-1">Reviews</h3>
           <p className="text-gray-400 text-sm">Your opinions</p>

@@ -7,6 +7,7 @@ import { FiStar, FiCalendar, FiFilm, FiGlobe, FiEdit, FiTrash2 } from "react-ico
 import { MdMovie, MdPerson } from "react-icons/md";
 import useAxios from "../hooks/useAxios";
 import MovieReviews from "../components/MovieReviews";
+import ErrorPage from "./ErrorPage";
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -55,17 +56,7 @@ const MovieDetails = () => {
   }
 
   if (!movie) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-base-100">
-        <div className="text-center">
-          <MdMovie className="text-primary text-6xl mx-auto mb-4" />
-          <h2 className="text-2xl text-white mb-4">Movie not found</h2>
-          <Link to="/movies">
-            <button className="btn bg-primary hover:bg-primary text-white border-none">Back to Movies</button>
-          </Link>
-        </div>
-      </div>
-    );
+    return <ErrorPage></ErrorPage>;
   }
 
   const isOwner = user && user.email === movie.addedBy;
