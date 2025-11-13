@@ -262,3 +262,222 @@ select {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ==================== LIGHT THEME STYLES ==================== */
+/* Add this to the END of your index.css file */
+
+/* Light Theme Base */
+body.light {
+  background-color: #ffffff;
+  color: #111827;
+}
+
+/* Background Colors */
+body.light .bg-movie-dark,
+body.light .bg-base-100 {
+  background-color: #ffffff !important;
+}
+
+body.light .bg-base-200,
+body.light .bg-movie-card {
+  background-color: #f3f4f6 !important;
+}
+
+body.light .bg-base-300 {
+  background-color: #e5e7eb !important;
+}
+
+body.light .bg-movie-darker {
+  background-color: #f9fafb !important;
+}
+
+/* Text Colors */
+body.light .text-white {
+  color: #111827 !important;
+}
+
+body.light .text-gray-400 {
+  color: #6b7280 !important;
+}
+
+body.light .text-gray-300 {
+  color: #4b5563 !important;
+}
+
+body.light .text-gray-500 {
+  color: #9ca3af !important;
+}
+
+body.light .text-gray-600 {
+  color: #4b5563 !important;
+}
+
+/* Border Colors - FIXED */
+body.light [class*="border-white"] {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Input Fields */
+body.light .input-field {
+  background-color: #ffffff !important;
+  border-color: #d1d5db !important;
+  color: #111827 !important;
+}
+
+body.light .input-field::placeholder {
+  color: #9ca3af !important;
+}
+
+body.light .input-field:focus {
+  border-color: #e50914 !important;
+}
+
+/* Movie Cards */
+body.light .card-movie {
+  background-color: #f3f4f6 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+body.light .card-movie:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Navbar */
+body.light nav {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Dropdown Menu */
+body.light .dropdown-content,
+body.light .menu {
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+body.light .menu li a:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Modal */
+body.light .modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+body.light .modal-content {
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+  border: 1px solid #e5e7eb !important;
+  color: #111827 !important;
+}
+
+/* Buttons - Keep Primary Color */
+body.light .btn-primary {
+  /* Keep red color for branding */
+  background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+}
+
+body.light .btn-secondary {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+body.light .btn-danger {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+}
+
+body.light .btn-ghost {
+  color: #111827 !important;
+}
+
+body.light .btn-ghost:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Range Slider */
+body.light .range {
+  background-color: #e5e7eb;
+}
+
+body.light .range::-webkit-slider-thumb {
+  background-color: #e50914;
+}
+
+body.light .range::-moz-range-thumb {
+  background-color: #e50914;
+}
+
+/* Footer */
+body.light footer {
+  background-color: #f9fafb !important;
+  border-top: 1px solid #e5e7eb !important;
+}
+
+/* Hero Section */
+body.light .hero {
+  background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+}
+
+/* Stats Cards */
+body.light .stat {
+  background-color: #f3f4f6 !important;
+}
+
+/* Divider */
+body.light .divider {
+  border-color: #e5e7eb !important;
+}
+
+/* Loading Spinner */
+body.light .loading {
+  color: #e50914;
+}
+
+/* Smooth Transitions */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Scrollbar - Light Theme */
+body.light ::-webkit-scrollbar {
+  width: 12px;
+}
+
+body.light ::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+body.light ::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 6px;
+}
+
+body.light ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Gradient Overlays */
+body.light .gradient-overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+}
+
+/* Badge */
+body.light .badge {
+  background-color: #e5e7eb !important;
+  color: #111827 !important;
+}
+
+/* Alert/Toast in Light Mode */
+body.light .alert {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+/* Responsive - Mobile Menu */
+@media (max-width: 768px) {
+  body.light .mobile-menu {
+    background-color: #ffffff !important;
+  }
+}
