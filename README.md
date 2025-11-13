@@ -12,7 +12,7 @@
   [![Firebase](https://img.shields.io/badge/Firebase-Auth-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com/)
   [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
-[Live Demo](https://your-demo-link.com) • [Report Bug](https://github.com/SarwarMorshad/movie-matrix-client/issues) • [Request Feature](https://github.com/SarwarMorshad/movie-matrix-client/issues)
+[Live Demo](https://movie-matrix-bb82a.web.app) • [Report Bug](https://github.com/SarwarMorshad/movie-matrix-client/issues) • [Request Feature](https://github.com/SarwarMorshad/movie-matrix-client/issues)
 
 </div>
 
@@ -22,15 +22,19 @@
 
 - [About](#-about)
 - [Features](#-features)
+- [Live Demo & Screenshots](#-live-demo--screenshots)
 - [Tech Stack](#-tech-stack)
 - [Getting Started](#-getting-started)
 - [Project Structure](#-project-structure)
 - [Environment Variables](#-environment-variables)
-- [API Endpoints](#-api-endpoints)
-- [Screenshots](#-screenshots)
+- [Available Scripts](#-available-scripts)
+- [Customization](#-customization)
+- [Deployment](#-deployment)
+- [Troubleshooting](#-troubleshooting)
 - [Contributing](#-contributing)
 - [License](#-license)
 - [Contact](#-contact)
+- [Acknowledgments](#-acknowledgments)
 
 ---
 
@@ -77,10 +81,12 @@ This is the **client-side application** - a lightning-fast, responsive React SPA
   - Real-time updates across the app
 
 - **👤 User Profile & Settings**
-  - View and edit your profile information
-  - Upload profile photos
+  - View and edit your profile information with dedicated profile page
+  - Edit profile with a separate edit interface
+  - Upload and update profile photos
   - Track your activity and statistics
-  - Subscription/plan management
+  - Subscription plans and premium features
+  - Manage account preferences
 
 ### 🎨 UI/UX Features
 
@@ -94,6 +100,43 @@ This is the **client-side application** - a lightning-fast, responsive React SPA
 - **Stats Dashboard** - View platform statistics and insights
 - **Hero Section** - Engaging homepage with featured content
 - **Footer & Navigation** - Consistent, intuitive navigation throughout
+- **SEO Optimized** - Dynamic meta tags and document head management with React Helmet Async
+
+### 📊 Quick Feature Reference
+
+| Category           | Features                                                  |
+| ------------------ | --------------------------------------------------------- |
+| **Authentication** | Email/Password, Google Sign-In, Protected Routes          |
+| **Movie Browsing** | All Movies, Genre Filter, Search, Top Rated, Recent       |
+| **Collections**    | My Collection, My Watchlist, Add/Remove                   |
+| **User Actions**   | Add Movie, Update Movie, Profile Management               |
+| **Pages**          | 14 Total (Home, Details, Collection, Watchlist, Profile+) |
+| **UI/UX**          | Dark Theme, Animations, Toast, Loading States, Responsive |
+| **SEO**            | Dynamic meta tags, Open Graph, optimized for search       |
+
+---
+
+## 🌐 Live Demo & Screenshots
+
+🎬 **Live Application:** [https://movie-matrix-bb82a.web.app](https://movie-matrix-bb82a.web.app)
+
+### Key Pages
+
+| Page              | Route                | Description                         |
+| ----------------- | -------------------- | ----------------------------------- |
+| 🏠 Home           | `/`                  | Homepage with hero, stats, featured |
+| 🎬 All Movies     | `/all-movies`        | Browse complete movie catalog       |
+| 🎥 Movie Details  | `/movie/:id`         | Detailed movie information          |
+| ➕ Add Movie      | `/add-movie`         | Add new movie (Protected)           |
+| ✏️ Update Movie   | `/update/:id`        | Edit movie details (Protected)      |
+| 📚 My Collection  | `/my-collection`     | Movies you've added                 |
+| ⭐ My Watchlist   | `/my-watchlist`      | Your saved watchlist                |
+| 👤 Profile        | `/profile`           | View your profile                   |
+| ✏️ Edit Profile   | `/edit-profile`      | Update profile info (Protected)     |
+| 💎 Plans          | `/plans`             | Subscription plans                  |
+| 🔐 Login/Register | `/login`/`/register` | Authentication pages                |
+
+> **Tip:** Try adding a movie, creating a watchlist, and exploring the genre sections!
 
 ---
 
@@ -110,17 +153,19 @@ This is the **client-side application** - a lightning-fast, responsive React SPA
 🔥  React Hot Toast   - Elegant toast notifications
 📱  React Icons       - Popular icon library (5000+ icons)
 🛣️  React Router v7   - Declarative routing for React
-�  Axios             - Promise-based HTTP client
+🔌  Axios             - Promise-based HTTP client
 🔐  Firebase          - Authentication & backend services
+⚡  React Helmet Async - SEO & dynamic document head management
+
 ```
 
 ### Backend Integration
 
 ```
-�  REST API          - Axios-based HTTP requests
+🌐  REST API          - Axios-based HTTP requests
 🔒  Secure Routes     - Custom useAxiosSecure hook with auth headers
-�  JWT Tokens        - Token-based authentication
-�  API Interceptors  - Automatic token refresh & error handling
+🔑  JWT Tokens        - Token-based authentication
+📡  API Interceptors  - Automatic token refresh & error handling
 ```
 
 ---
@@ -251,6 +296,9 @@ movie-matrix-client/
 │   │   ├── UpdateMovie.jsx         # Update movie (protected)
 │   │   ├── MyCollection.jsx        # User's added movies
 │   │   ├── MyWatchlist.jsx         # User's watchlist
+│   │   ├── Profile.jsx             # User profile page
+│   │   ├── EditProfile.jsx         # Edit profile page (protected)
+│   │   ├── SubscriptionPlans.jsx   # Subscription & plans
 │   │   ├── Login.jsx               # Login page
 │   │   ├── Register.jsx            # Registration page
 │   │   ├── ErrorPage.jsx           # 404/error page
@@ -438,6 +486,78 @@ firebase deploy
 - 💡 Use dynamic imports for large components
 - 💡 Optimize images before adding to `public/`
 
+### ⚡ Performance Tips
+
+- **Code Splitting**: Large components are lazy-loaded using React's `lazy()` and `Suspense`
+- **Image Optimization**: Use WebP format for images, compress before upload
+- **Caching**: Vite handles browser caching automatically
+- **Tree Shaking**: Unused code is automatically removed in production
+- **Minification**: All JS/CSS is minified in production builds
+- **CDN**: Consider using a CDN for static assets in production
+
+---
+
+## ❓ Troubleshooting
+
+### Common Issues
+
+<details>
+<summary><strong>Port 5173 already in use</strong></summary>
+
+Change the port in `vite.config.js`:
+
+```javascript
+export default defineConfig({
+  server: {
+    port: 3000, // or any other available port
+  },
+});
+```
+
+</details>
+
+<details>
+<summary><strong>Firebase configuration errors</strong></summary>
+
+- Verify all environment variables are set correctly in `.env.local`
+- Ensure all variables start with `VITE_` prefix
+- Check Firebase Console for correct credentials
+- Restart dev server after changing `.env.local`
+
+</details>
+
+<details>
+<summary><strong>Build fails / Module not found</strong></summary>
+
+```pwsh
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json dist
+npm install
+npm run build
+```
+
+</details>
+
+<details>
+<summary><strong>Authentication not working</strong></summary>
+
+- Enable Email/Password and Google Sign-In in Firebase Console
+- Check that Firebase config values are correct
+- Ensure you're using the correct Firebase project
+- Clear browser cache and cookies
+
+</details>
+
+<details>
+<summary><strong>Styling issues / Tailwind not working</strong></summary>
+
+- Verify `tailwind.config.js` and `postcss.config.js` are present
+- Check that Tailwind directives are in `src/index.css`
+- Clear Vite cache: `rm -rf node_modules/.vite`
+- Restart dev server
+
+</details>
+
 ---
 
 ## 🤝 Contributing
@@ -529,7 +649,7 @@ Distributed under the MIT License. See `LICENSE` file for more information.
 
 **Project Link:** [https://github.com/SarwarMorshad/movie-matrix-client](https://github.com/SarwarMorshad/movie-matrix-client)
 
-**Live Demo:** [Add your deployed URL here]
+**Live Demo:** [https://movie-matrix-bb82a.web.app](https://movie-matrix-bb82a.web.app) 🚀
 
 ---
 
@@ -546,6 +666,7 @@ Special thanks to these amazing tools and resources:
 - [React Router](https://reactrouter.com/) - Client-side routing
 - [React Icons](https://react-icons.github.io/react-icons/) - Popular icons as React components
 - [React Hot Toast](https://react-hot-toast.com/) - Smoking hot React notifications
+- [React Helmet Async](https://github.com/staylor/react-helmet-async) - Manage document head for SEO
 - [Axios](https://axios-http.com/) - Promise based HTTP client
 - [TMDB](https://www.themoviedb.org/) - The Movie Database for movie data & posters
 - [Shields.io](https://shields.io/) - For awesome README badges
@@ -560,6 +681,23 @@ This project was built to showcase modern React development practices with:
 - Protected routing patterns
 - Firebase authentication integration
 - Responsive design principles
+
+### 🗺️ Roadmap & Future Enhancements
+
+Potential features for future versions:
+
+- [ ] **Advanced Search** - Multi-criteria search with filters
+- [ ] **Social Features** - Follow users, share watchlists
+- [ ] **Reviews & Ratings** - User-generated reviews and ratings
+- [ ] **Recommendations** - AI-powered movie suggestions
+- [ ] **Watch History** - Track movies you've watched
+- [ ] **Export/Import** - Backup watchlists and collections
+- [ ] **Mobile App** - React Native companion app
+- [ ] **Dark/Light Toggle** - Manual theme switcher
+- [ ] **Multi-language** - Internationalization support
+- [ ] **Offline Mode** - PWA with offline capabilities
+
+Want to contribute to any of these? Check out the [Contributing](#-contributing) section!
 
 ---
 
