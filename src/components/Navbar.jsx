@@ -1,8 +1,9 @@
 import { useContext, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { FiMenu, FiX, FiUser, FiLogOut } from "react-icons/fi";
+import { FiMenu, FiX, FiUser, FiLogOut, FiHeart } from "react-icons/fi";
 import { MdMovie } from "react-icons/md";
+import ThemeToggle from "./ThemeToggle";
 
 const Navbar = () => {
   const { user, logOut } = useContext(AuthContext);
@@ -67,6 +68,16 @@ const Navbar = () => {
               My Collection
             </NavLink>
           </li>
+          <li>
+            <NavLink
+              to="/my-watchlist"
+              className={({ isActive }) =>
+                isActive ? "text-primary font-semibold" : "text-white hover:text-primary transition-colors"
+              }
+            >
+              Watchlist
+            </NavLink>
+          </li>
         </>
       )}
     </>
@@ -89,6 +100,9 @@ const Navbar = () => {
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {user ? (
               <div className="dropdown dropdown-end">
                 <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
@@ -109,11 +123,19 @@ const Navbar = () => {
                     <span className="text-white font-semibold">{user.displayName || "User"}</span>
                     <span className="text-gray-400 text-xs">{user.email}</span>
                   </li>
-                  <li className="divider my-1"></li>
+                  <li>
+                    <div className="divider my-1"></div>
+                  </li>
                   <li>
                     <Link to="/my-collection" className="text-white hover:text-primary">
                       <FiUser className="text-lg" />
                       My Collection
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/my-watchlist" className="text-white hover:text-primary">
+                      <FiHeart className="text-lg" />
+                      My Watchlist
                     </Link>
                   </li>
                   <li>
@@ -140,6 +162,9 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-3">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {user && (
               <div className="avatar">
                 <div className="w-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1">
