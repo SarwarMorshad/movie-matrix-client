@@ -8,6 +8,7 @@ import MovieDetails from "../pages/MovieDetails";
 import AddMovie from "../pages/AddMovie";
 import UpdateMovie from "../pages/UpdateMovie";
 import MyCollection from "../pages/MyCollection";
+import MyWatchlist from "../pages/MyWatchlist";
 import ErrorPage from "../pages/ErrorPage";
 import PrivateRoute from "./PrivateRoute";
 
@@ -58,6 +59,14 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <MyCollection />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/my-watchlist",
+        element: (
+          <PrivateRoute>
+            <MyWatchlist />
           </PrivateRoute>
         ),
       },
