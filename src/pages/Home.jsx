@@ -7,6 +7,7 @@ import GenreSection from "../components/GenreSection";
 import AboutSection from "../components/AboutSection";
 import LoadingSpinner from "../components/LoadingSpinner";
 import useAxios from "../hooks/useAxios";
+import { Helmet } from "react-helmet-async";
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
@@ -49,25 +50,34 @@ const Home = () => {
   }
 
   return (
-    <div className="min-h-screen bg-movie-dark max-w-11/12 mx-auto">
-      {/* Hero Section */}
-      <HeroSection movies={topRatedMovies} />
+    <>
+      <Helmet>
+        <title>Home - Movie Matrix</title>
+        <meta
+          name="description"
+          content="Welcome to Movie Matrix - Your ultimate movie collection and discovery platform."
+        />
+      </Helmet>
+      <div className="min-h-screen bg-movie-dark max-w-11/12 mx-auto">
+        {/* Hero Section */}
+        <HeroSection movies={topRatedMovies} />
 
-      {/* Top Rated Movies Section */}
-      <TopRatedMovies movies={topRatedMovies} />
+        {/* Top Rated Movies Section */}
+        <TopRatedMovies movies={topRatedMovies} />
 
-      {/* Recently Added Movies Section */}
-      <RecentMovies movies={recentMovies} />
+        {/* Recently Added Movies Section */}
+        <RecentMovies movies={recentMovies} />
 
-      {/* Genre Section */}
-      <GenreSection />
+        {/* Genre Section */}
+        <GenreSection />
 
-      {/* Statistics Section */}
-      <StatsSection stats={stats} />
+        {/* Statistics Section */}
+        <StatsSection stats={stats} />
 
-      {/* About Platform Section */}
-      <AboutSection />
-    </div>
+        {/* About Platform Section */}
+        <AboutSection />
+      </div>
+    </>
   );
 };
 

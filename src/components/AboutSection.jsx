@@ -52,11 +52,6 @@ const AboutSection = () => {
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header with Animation */}
         <div className="text-center mb-20 animate-fadeIn">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-6 py-2 rounded-full mb-6 border border-primary/20">
-            <HiSparkles className="animate-spin-slow" />
-            <span className="font-semibold">About Movie Matrix</span>
-          </div>
-
           <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 font-heading">
             Your Ultimate
             <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-gradient">
