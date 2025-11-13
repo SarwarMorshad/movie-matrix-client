@@ -19,8 +19,6 @@ const Profile = () => {
   const [imageError, setImageError] = useState(false);
   const axiosInstance = useAxios();
 
-  //   const API_URL = "http://localhost:3000";
-
   // Default avatar
   const defaultAvatar = "https://i.ibb.co/2FbxWkt/user.png";
   const userAvatar = imageError ? defaultAvatar : user?.photoURL || defaultAvatar;
