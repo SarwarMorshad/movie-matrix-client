@@ -1,48 +1,43 @@
 import axios from "axios";
-
-import useAuth from "./useAuth";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
+import { signOut } from "firebase/auth";
+import auth from "../firebase/firebase.init";
+import { API_URL } from "./useAxios";
 
-const axiosInstance = axios.create({
-  baseURL: "http://localhost:3000",
+// API calls that need a logged-in user. Every request carries the current
+// Firebase ID token, which the server verifies.
+const axiosSecure = axios.create({ baseURL: API_URL });
+
+axiosSecure.interceptors.request.use(async (config) => {
+  const currentUser = auth.currentUser;
+  if (currentUser) {
+    // getIdToken() returns a cached token and refreshes it when it expires
+    const token = await currentUser.getIdToken();
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 const useAxiosSecure = () => {
-  const { user, signOutUser } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    //   Request Interceptor
-    const requestInterceptor = axiosInstance.interceptors.request.use((config) => {
-      if (user?.accessToken) {
-        config.headers.authorization = `Bearer ${user.accessToken}`;
-      }
-      return config;
-    });
-
-    // Response Interceptor
-    const responseInterceptor = axiosInstance.interceptors.response.use(
-      (res) => {
-        return res;
-      },
-      (err) => {
-        if ((err.response && err.response.status === 401) || err.response.status === 403) {
-          signOutUser().then(() => {
-            //   navigate to login page
-            navigate("/register");
-          });
+    // A 401 means the session is missing or expired: sign out and go to login.
+    const id = axiosSecure.interceptors.response.use(
+      (res) => res,
+      async (error) => {
+        if (error.response?.status === 401) {
+          await signOut(auth);
+          navigate("/login");
         }
+        return Promise.reject(error);
       }
     );
+    return () => axiosSecure.interceptors.response.eject(id);
+  }, [navigate]);
 
-    return () => {
-      axiosInstance.interceptors.request.eject(requestInterceptor);
-      axiosInstance.interceptors.response.eject(responseInterceptor);
-    };
-  }, [user, signOutUser, navigate]);
-
-  return axiosInstance;
+  return axiosSecure;
 };
 
 export default useAxiosSecure;
