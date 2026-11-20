@@ -38,6 +38,8 @@ const data = (request) => request.then((res) => res.data);
 // ---------- Movies ----------
 export const getMovies = () => data(api.get("/movies"));
 export const getMovie = (id) => data(api.get(`/movies/${id}`));
+// params: { search, genre, language, minRating, sort, page, limit } -> { movies, total, page, totalPages, limit }
+export const browseMovies = (params) => data(api.get("/movies-browse", { params }));
 export const getTopRatedMovies = (limit) => data(api.get("/movies-top-rated", { params: { limit } }));
 export const getRecentMovies = (limit) => data(api.get("/movies-recent", { params: { limit } }));
 export const getMyMovies = () => data(api.get("/my-movies"));
@@ -66,3 +68,4 @@ export const getMoviesCount = () => data(api.get("/stats/movies-count"));
 export const getUsersCount = () => data(api.get("/stats/users-count"));
 export const getReviewsCount = () => data(api.get("/stats/reviews-count"));
 export const getGenreCounts = () => data(api.get("/stats/genres")); // [{ genre, count }]
+export const getLanguageCounts = () => data(api.get("/stats/languages")); // [{ language, count }]
