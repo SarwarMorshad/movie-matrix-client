@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
 import MovieCard from "../components/movie/MovieCard";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import { FiSearch, FiFilter } from "react-icons/fi";
@@ -10,11 +11,21 @@ const AllMovies = () => {
   const [movies, setMovies] = useState([]);
   const [filteredMovies, setFilteredMovies] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  // ?search= (navbar search) and ?genre= (home genre tiles) pre-fill the filters
+  const [searchParams] = useSearchParams();
+  const urlSearch = searchParams.get("search") || "";
+  const urlGenre = searchParams.get("genre") || "";
+  const [searchTerm, setSearchTerm] = useState(urlSearch);
   const [showFilters, setShowFilters] = useState(false);
 
   // Filter states
-  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [selectedGenres, setSelectedGenres] = useState(urlGenre ? [urlGenre] : []);
+
+  // Searching again from the navbar while already on this page updates the filters
+  useEffect(() => {
+    setSearchTerm(urlSearch);
+    setSelectedGenres(urlGenre ? [urlGenre] : []);
+  }, [urlSearch, urlGenre]);
   const [minRating, setMinRating] = useState(0);
   const [maxRating, setMaxRating] = useState(10);
 
