@@ -77,7 +77,7 @@ const HeroSlider = ({ movies }) => {
         role="group"
         aria-roledescription="slide"
         aria-label={`${index + 1} of ${count}`}
-        className="mx-auto flex min-h-[560px] max-w-[1180px] items-center gap-12 px-6 pt-12 pb-24 motion-safe:animate-fadeIn md:min-h-[640px]"
+        className="mx-auto flex min-h-[560px] max-w-[1180px] items-center gap-12 px-6 pt-28 pb-24 motion-safe:animate-fadeIn md:min-h-[640px]"
       >
         <div className="flex max-w-2xl flex-1 flex-col gap-[18px]">
           <p className="font-display text-[13px] font-bold tracking-[0.14em] text-mm-accent uppercase">
