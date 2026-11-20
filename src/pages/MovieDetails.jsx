@@ -73,7 +73,7 @@ const MovieDetails = () => {
         {/* Hero Section with Backdrop */}
         <div className="relative h-[60vh] md:h-[70vh] overflow-hidden">
           <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-base-100 via-base-100/80 to-base-100/40"></div>
+          <div className="absolute inset-0 bg-linear-to-t from-base-100 via-base-100/80 to-base-100/40"></div>
         </div>
 
         {/* Content */}

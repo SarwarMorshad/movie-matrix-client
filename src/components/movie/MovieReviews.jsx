@@ -357,7 +357,7 @@ const MovieReviews = ({ movieId }) => {
                           {review.userPhoto ? (
                             <img src={review.userPhoto} alt={review.userName} referrerPolicy="no-referrer" />
                           ) : (
-                            <div className="bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-2xl font-bold w-full h-full">
+                            <div className="bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white text-2xl font-bold w-full h-full">
                               {review.userName.charAt(0).toUpperCase()}
                             </div>
                           )}

@@ -83,7 +83,7 @@ const GenreSection = () => {
               <div className="relative overflow-hidden rounded-xl aspect-square bg-movie-card hover:scale-105 transition-transform duration-300">
                 {/* Gradient Background */}
                 <div
-                  className={`absolute inset-0 bg-gradient-to-br ${genre.color} opacity-20 group-hover:opacity-30 transition-opacity`}
+                  className={`absolute inset-0 bg-linear-to-br ${genre.color} opacity-20 group-hover:opacity-30 transition-opacity`}
                 ></div>
 
                 {/* Content */}

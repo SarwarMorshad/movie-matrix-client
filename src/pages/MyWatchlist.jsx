@@ -74,7 +74,7 @@ const MyWatchlist = () => {
                 >
                   <div className="flex">
                     {/* Poster */}
-                    <Link to={`/movies/${movie._id}`} className="flex-shrink-0">
+                    <Link to={`/movies/${movie._id}`} className="shrink-0">
                       <img src={movie.posterUrl} alt={movie.title} className="w-32 h-48 object-cover" />
                     </Link>
 

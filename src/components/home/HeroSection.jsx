@@ -35,8 +35,8 @@ const HeroSection = ({ movies }) => {
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
         <img src={currentMovie.posterUrl} alt={currentMovie.title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-base-100 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-r from-black via-black/70 to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-base-100 via-transparent to-transparent"></div>
       </div>
 
       {/* Content */}
