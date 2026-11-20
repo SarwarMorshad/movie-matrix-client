@@ -1,20 +1,23 @@
 import { Link } from "react-router-dom";
-import MovieCard from "./MovieCard";
-import { FiArrowRight } from "react-icons/fi";
+import MovieCard from "../movie/MovieCard";
+import { FiArrowRight, FiClock } from "react-icons/fi";
 
-const TopRatedMovies = ({ movies }) => {
+const RecentMovies = ({ movies }) => {
   if (!movies || movies.length === 0) {
     return null;
   }
 
   return (
-    <section className="py-16 bg-movie-dark">
+    <section className="py-16 bg-movie-darker">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-10">
           <div>
-            <h2 className="section-title">Top Rated Movies</h2>
-            <p className="text-gray-400 text-lg">Discover the highest-rated movies in our collection</p>
+            <div className="flex items-center space-x-3 mb-2">
+              <FiClock className="text-primary text-3xl" />
+              <h2 className="section-title mb-0">Recently Added</h2>
+            </div>
+            <p className="text-gray-400 text-lg">Check out the latest additions to our movie collection</p>
           </div>
           <Link to="/movies">
             <button className="hidden md:flex btn btn-outline text-white hover:bg-white hover:text-black border-white">
@@ -25,8 +28,8 @@ const TopRatedMovies = ({ movies }) => {
         </div>
 
         {/* Movies Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-          {movies.slice(0, 5).map((movie, index) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          {movies.slice(0, 6).map((movie, index) => (
             <div key={movie._id} className="animate-fadeIn" style={{ animationDelay: `${index * 0.1}s` }}>
               <MovieCard movie={movie} />
             </div>
@@ -47,4 +50,4 @@ const TopRatedMovies = ({ movies }) => {
   );
 };
 
-export default TopRatedMovies;
+export default RecentMovies;

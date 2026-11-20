@@ -3,14 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { MdMovie } from "react-icons/md";
-import useAxios from "../hooks/useAxios";
+import * as api from "../api/api";
 import { Helmet } from "react-helmet-async";
 
 const AddMovie = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const axiosInstance = useAxios();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +33,7 @@ const AddMovie = () => {
     };
 
     try {
-      await axiosInstance.post("/movies", movieData);
+      await api.addMovie(movieData);
       toast.success("Movie added successfully!");
       navigate("/my-collection");
     } catch (error) {

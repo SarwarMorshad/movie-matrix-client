@@ -2,9 +2,9 @@ import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
-import LoadingSpinner from "../components/LoadingSpinner";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 import { MdMovie } from "react-icons/md";
-import useAxios from "../hooks/useAxios";
+import * as api from "../api/api";
 import { Helmet } from "react-helmet-async";
 
 const UpdateMovie = () => {
@@ -14,7 +14,6 @@ const UpdateMovie = () => {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const axiosInstance = useAxios();
 
   useEffect(() => {
     fetchMovie();
@@ -23,8 +22,7 @@ const UpdateMovie = () => {
   const fetchMovie = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(`/movies/${id}`);
-      const movieData = response.data;
+      const movieData = await api.getMovie(id);
 
       // Check if user is owner
       if (user.email !== movieData.addedBy) {
@@ -64,7 +62,7 @@ const UpdateMovie = () => {
     };
 
     try {
-      await axiosInstance.put(`/movies/${id}`, updatedData);
+      await api.updateMovie(id, updatedData);
       toast.success("Movie updated successfully!");
       navigate(`/movies/${id}`);
     } catch (error) {

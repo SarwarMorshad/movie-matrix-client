@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import HeroSection from "../components/HeroSection";
-import StatsSection from "../components/StatsSection";
-import TopRatedMovies from "../components/TopRatedMovies";
-import RecentMovies from "../components/RecentMovies";
-import GenreSection from "../components/GenreSection";
-import AboutSection from "../components/AboutSection";
-import LoadingSpinner from "../components/LoadingSpinner";
-import useAxios from "../hooks/useAxios";
+import HeroSection from "../components/home/HeroSection";
+import StatsSection from "../components/home/StatsSection";
+import TopRatedMovies from "../components/home/TopRatedMovies";
+import RecentMovies from "../components/home/RecentMovies";
+import GenreSection from "../components/home/GenreSection";
+import AboutSection from "../components/home/AboutSection";
+import LoadingSpinner from "../components/common/LoadingSpinner";
+import * as api from "../api/api";
 import { Helmet } from "react-helmet-async";
 
 const Home = () => {
@@ -14,7 +14,6 @@ const Home = () => {
   const [stats, setStats] = useState({ totalMovies: 0, totalUsers: 0 });
   const [topRatedMovies, setTopRatedMovies] = useState([]);
   const [recentMovies, setRecentMovies] = useState([]);
-  const axiosInstance = useAxios();
 
   useEffect(() => {
     fetchHomeData();
@@ -26,18 +25,18 @@ const Home = () => {
 
       // Fetch all data in parallel
       const [statsMovies, statsUsers, topRated, recent] = await Promise.all([
-        axiosInstance.get("/stats/movies-count"),
-        axiosInstance.get("/stats/users-count"),
-        axiosInstance.get("/movies-top-rated"),
-        axiosInstance.get("/movies-recent"),
+        api.getMoviesCount(),
+        api.getUsersCount(),
+        api.getTopRatedMovies(),
+        api.getRecentMovies(),
       ]);
 
       setStats({
-        totalMovies: statsMovies.data.totalMovies,
-        totalUsers: statsUsers.data.totalUsers,
+        totalMovies: statsMovies.totalMovies,
+        totalUsers: statsUsers.totalUsers,
       });
-      setTopRatedMovies(topRated.data);
-      setRecentMovies(recent.data);
+      setTopRatedMovies(topRated);
+      setRecentMovies(recent);
     } catch (error) {
       console.error("Error fetching home data:", error);
     } finally {

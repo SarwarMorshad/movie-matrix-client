@@ -210,8 +210,9 @@ VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 
-# Backend API URL (adjust based on your backend server)
-VITE_API_URL=http://localhost:5000
+# Backend API URL. Optional: defaults to the deployed server.
+# Point it at a local server while developing.
+VITE_API_URL=http://localhost:3000
 ```
 
 4. **Start the Development Server**
@@ -260,30 +261,23 @@ movie-matrix-client/
 │   └── (static files like favicon, images)
 │
 ├── src/
+│   ├── api/
+│   │   └── api.js                  # EVERY API call lives here (adds the login token)
+│   │
 │   ├── assets/               # Images, icons, media files
 │   │
 │   ├── components/           # Reusable UI components
-│   │   ├── AboutSection.jsx        # About section for homepage
-│   │   ├── Footer.jsx              # App footer
-│   │   ├── GenreSection.jsx        # Genre browsing component
-│   │   ├── HeroSection.jsx         # Hero banner
-│   │   ├── LoadingSpinner.jsx      # Loading state component
-│   │   ├── MovieCard.jsx           # Movie display card
-│   │   ├── Navbar.jsx              # Navigation bar
-│   │   ├── RecentMovies.jsx        # Recent movies section
-│   │   ├── StatsSection.jsx        # Statistics display
-│   │   ├── ThemeToggle.jsx         # Dark/light theme switcher
-│   │   └── TopRatedMovies.jsx      # Top-rated movies section
+│   │   ├── common/                 # LoadingSpinner, ThemeToggle
+│   │   ├── home/                   # Home page sections (Hero, Stats, TopRated, Recent, Genre, About)
+│   │   ├── layout/                 # Navbar, Footer
+│   │   └── movie/                  # MovieCard, MovieReviews
+│   │
+│   ├── config/
+│   │   └── firebase.js             # Firebase initialization
 │   │
 │   ├── context/              # React Context
-│   │   └── AuthContext.jsx         # Authentication context
-│   │
-│   ├── firebase/             # Firebase configuration
-│   │   └── firebase.init.js        # Firebase initialization
-│   │
-│   ├── hooks/                # Custom React hooks
-│   │   ├── useAxios.jsx            # Axios wrapper hook
-│   │   └── useAxiosSecure.jsx      # Secure axios with auth
+│   │   ├── AuthContext.jsx         # Authentication context
+│   │   └── AuthProvider.jsx        # Authentication provider
 │   │
 │   ├── layouts/              # Layout components
 │   │   └── MainLayout.jsx          # Main app layout wrapper
@@ -304,14 +298,9 @@ movie-matrix-client/
 │   │   ├── ErrorPage.jsx           # 404/error page
 │   │   └── MoviesNotFound.jsx      # No movies found state
 │   │
-│   ├── provider/             # Context providers
-│   │   └── AuthProvider.jsx        # Authentication provider
-│   │
-│   ├── Routes/               # Routing configuration
+│   ├── routes/               # Routing configuration
 │   │   ├── Router.jsx              # Route definitions
 │   │   └── PrivateRoute.jsx        # Protected route wrapper
-│   │
-│   ├── utils/                # Utility functions
 │   │
 │   ├── App.jsx               # Root component
 │   ├── App.css               # App-specific styles

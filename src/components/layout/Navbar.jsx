@@ -1,10 +1,10 @@
 import { useContext, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 import { FiMenu, FiX, FiLogOut, FiHeart, FiUser } from "react-icons/fi";
 import { MdMovie, MdVideoLibrary } from "react-icons/md";
 import { HiSparkles } from "react-icons/hi";
-import ThemeToggle from "./ThemeToggle";
+import ThemeToggle from "../common/ThemeToggle";
 
 const Navbar = () => {
   const { user, logOut } = useContext(AuthContext);

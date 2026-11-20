@@ -5,8 +5,8 @@ import { MdMovie } from "react-icons/md";
 import { HiSparkles } from "react-icons/hi";
 import toast from "react-hot-toast";
 import { Link, Navigate } from "react-router-dom";
-import useAxios from "../hooks/useAxios";
-import LoadingSpinner from "../components/LoadingSpinner";
+import * as api from "../api/api";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 import { Helmet } from "react-helmet-async";
 
 const Profile = () => {
@@ -18,7 +18,6 @@ const Profile = () => {
     reviewsGiven: 0,
   });
   const [imageError, setImageError] = useState(false);
-  const axiosInstance = useAxios();
 
   // Default avatar
   const defaultAvatar = "https://i.ibb.co/2FbxWkt/user.png";
@@ -34,15 +33,15 @@ const Profile = () => {
   const fetchUserStats = async () => {
     try {
       const [moviesRes, watchlistRes, reviewsRes] = await Promise.all([
-        axiosInstance.get(`/my-movies?email=${user.email}`),
-        axiosInstance.get(`/watchlist/${user.email}`),
-        axiosInstance.get(`/my-reviews?email=${user.email}`),
+        api.getMyMovies(),
+        api.getWatchlist(),
+        api.getMyReviews(),
       ]);
 
       setStats({
-        moviesAdded: moviesRes.data.length,
-        watchlist: watchlistRes.data.length,
-        reviewsGiven: reviewsRes.data.length,
+        moviesAdded: moviesRes.length,
+        watchlist: watchlistRes.length,
+        reviewsGiven: reviewsRes.length,
       });
     } catch (error) {
       console.error("Error fetching stats:", error);

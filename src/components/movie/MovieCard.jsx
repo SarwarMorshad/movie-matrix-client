@@ -1,17 +1,16 @@
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 import { FiStar, FiCalendar, FiHeart } from "react-icons/fi";
 import { MdMovie, MdFavorite } from "react-icons/md";
 
 import toast from "react-hot-toast";
-import useAxios from "../hooks/useAxios";
+import * as api from "../../api/api";
 
 const MovieCard = ({ movie }) => {
   const { user } = useContext(AuthContext);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [adding, setAdding] = useState(false);
-  const axiosInstance = useAxios();
 
   const addToWatchlist = async (e) => {
     e.preventDefault(); // Prevent link navigation
@@ -24,10 +23,7 @@ const MovieCard = ({ movie }) => {
 
     setAdding(true);
     try {
-      await axiosInstance.post("/watchlist", {
-        email: user.email,
-        movieId: movie._id,
-      });
+      await api.addToWatchlist(movie._id);
       setIsInWatchlist(true);
       toast.success("Added to watchlist!");
     } catch (error) {
