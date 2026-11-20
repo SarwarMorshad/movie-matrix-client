@@ -38,8 +38,8 @@ const data = (request) => request.then((res) => res.data);
 // ---------- Movies ----------
 export const getMovies = () => data(api.get("/movies"));
 export const getMovie = (id) => data(api.get(`/movies/${id}`));
-export const getTopRatedMovies = () => data(api.get("/movies-top-rated"));
-export const getRecentMovies = () => data(api.get("/movies-recent"));
+export const getTopRatedMovies = (limit) => data(api.get("/movies-top-rated", { params: { limit } }));
+export const getRecentMovies = (limit) => data(api.get("/movies-recent", { params: { limit } }));
 export const getMyMovies = () => data(api.get("/my-movies"));
 export const addMovie = (movie) => data(api.post("/movies", movie));
 export const updateMovie = (id, movie) => data(api.put(`/movies/${id}`, movie));
@@ -65,3 +65,4 @@ export const getMe = () => data(api.get("/users/me"));
 export const getMoviesCount = () => data(api.get("/stats/movies-count"));
 export const getUsersCount = () => data(api.get("/stats/users-count"));
 export const getReviewsCount = () => data(api.get("/stats/reviews-count"));
+export const getGenreCounts = () => data(api.get("/stats/genres")); // [{ genre, count }]
