@@ -87,7 +87,12 @@ const ExpandingSearch = () => {
         placeholder="Titles, genres, people"
         className="min-w-0 flex-1 bg-transparent text-sm text-mm-ink placeholder:text-mm-muted focus:outline-none [&::-webkit-search-cancel-button]:hidden"
       />
-      <button type="button" onClick={close} aria-label="Close search" className="shrink-0 text-mm-muted hover:text-mm-ink">
+      <button
+        type="button"
+        onClick={close}
+        aria-label="Close search"
+        className="shrink-0 text-mm-muted hover:text-mm-ink"
+      >
         <FiX aria-hidden="true" />
       </button>
     </form>
@@ -149,7 +154,13 @@ const ProfileMenu = ({ user, onLogout }) => {
       className={`flex ${size} shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-mm-accent font-display font-extrabold text-mm-on-accent`}
     >
       {user.photoURL && !imageFailed ? (
-        <img src={user.photoURL} alt="" referrerPolicy="no-referrer" onError={() => setImageFailed(true)} className="size-full object-cover" />
+        <img
+          src={user.photoURL}
+          alt=""
+          referrerPolicy="no-referrer"
+          onError={() => setImageFailed(true)}
+          className="size-full object-cover"
+        />
       ) : (
         initial
       )}
@@ -172,7 +183,10 @@ const ProfileMenu = ({ user, onLogout }) => {
       </button>
 
       {open && (
-        <div role="menu" className="absolute top-full right-0 z-50 mt-4 w-60 border border-white/15 bg-black/95 shadow-2xl">
+        <div
+          role="menu"
+          className="absolute top-full right-0 z-50 mt-4 w-60 border border-white/15 bg-black/95 shadow-2xl"
+        >
           <div className="flex items-center gap-3 px-4 py-3">
             {avatar("size-8")}
             <div className="min-w-0">
@@ -225,6 +239,8 @@ const Navbar = () => {
 
   // Only the home page has a hero to sit on; elsewhere the bar is always solid
   const transparent = pathname === "/" && !scrolled;
+  // Logged-out landing page: just the logo and Sign in, like a streaming sign-up page
+  const minimal = pathname === "/" && !user;
 
   return (
     <header
@@ -235,25 +251,29 @@ const Navbar = () => {
       <nav aria-label="Main" className="flex h-16 items-center gap-6 px-4 sm:px-8 lg:h-[68px] lg:px-14">
         <Logo />
 
-        <ul className="hidden items-center gap-5 lg:flex">
-          {links.map((l) => (
-            <li key={l.to}>
-              <NavLink
-                to={l.to}
-                end={l.end}
-                className={({ isActive }) =>
-                  `text-sm transition-colors ${isActive ? "font-bold text-mm-ink" : "text-mm-ink/75 hover:text-mm-muted"}`
-                }
-              >
-                {l.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-        <BrowseMenu links={links} />
+        {!minimal && (
+          <>
+            <ul className="hidden items-center gap-5 lg:flex">
+              {links.map((l) => (
+                <li key={l.to}>
+                  <NavLink
+                    to={l.to}
+                    end={l.end}
+                    className={({ isActive }) =>
+                      `text-sm transition-colors ${isActive ? "font-bold text-mm-ink" : "text-mm-ink/75 hover:text-mm-muted"}`
+                    }
+                  >
+                    {l.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+            <BrowseMenu links={links} />
+          </>
+        )}
 
         <div className="ml-auto flex items-center gap-3 sm:gap-5">
-          <ExpandingSearch />
+          {!minimal && <ExpandingSearch />}
           {user ? (
             <ProfileMenu user={user} onLogout={handleLogout} />
           ) : (
