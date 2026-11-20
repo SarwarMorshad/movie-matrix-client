@@ -22,7 +22,7 @@ const PosterGrid = ({ movies, badge }) => (
   </ul>
 );
 
-const Home = () => {
+const BrowseHome = () => {
   const [loading, setLoading] = useState(true);
   const [topRated, setTopRated] = useState([]);
   const [recent, setRecent] = useState([]);
@@ -76,4 +76,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default BrowseHome;
