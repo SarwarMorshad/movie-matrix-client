@@ -5,7 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock, FiUser, FiImage, FiEye, FiEyeOff } from "react-icons/fi";
 import { MdMovie } from "react-icons/md";
 import toast from "react-hot-toast";
-import useAxios from "../hooks/useAxios";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 import { Helmet } from "react-helmet-async";
 
 const Register = () => {
@@ -14,7 +14,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
-  const axiosInstance = useAxios();
+  const axiosInstance = useAxiosSecure();
 
   const validatePassword = (password) => {
     const hasUpperCase = /[A-Z]/.test(password);

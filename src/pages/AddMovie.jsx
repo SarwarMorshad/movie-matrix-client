@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { MdMovie } from "react-icons/md";
-import useAxios from "../hooks/useAxios";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 import { Helmet } from "react-helmet-async";
 
 const AddMovie = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const axiosInstance = useAxios();
+  const axiosInstance = useAxiosSecure();
 
   const handleSubmit = async (e) => {
     e.preventDefault();

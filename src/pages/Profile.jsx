@@ -5,7 +5,7 @@ import { MdMovie } from "react-icons/md";
 import { HiSparkles } from "react-icons/hi";
 import toast from "react-hot-toast";
 import { Link, Navigate } from "react-router-dom";
-import useAxios from "../hooks/useAxios";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { Helmet } from "react-helmet-async";
 
@@ -18,7 +18,7 @@ const Profile = () => {
     reviewsGiven: 0,
   });
   const [imageError, setImageError] = useState(false);
-  const axiosInstance = useAxios();
+  const axiosInstance = useAxiosSecure();
 
   // Default avatar
   const defaultAvatar = "https://i.ibb.co/2FbxWkt/user.png";

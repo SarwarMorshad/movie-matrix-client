@@ -5,13 +5,13 @@ import { FiStar, FiCalendar, FiHeart } from "react-icons/fi";
 import { MdMovie, MdFavorite } from "react-icons/md";
 
 import toast from "react-hot-toast";
-import useAxios from "../hooks/useAxios";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const MovieCard = ({ movie }) => {
   const { user } = useContext(AuthContext);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [adding, setAdding] = useState(false);
-  const axiosInstance = useAxios();
+  const axiosInstance = useAxiosSecure();
 
   const addToWatchlist = async (e) => {
     e.preventDefault(); // Prevent link navigation

@@ -5,14 +5,14 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import toast from "react-hot-toast";
 import { MdFavorite, MdDelete } from "react-icons/md";
 import { FiStar } from "react-icons/fi";
-import useAxios from "../hooks/useAxios";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 import { Helmet } from "react-helmet-async";
 
 const MyWatchlist = () => {
   const { user } = useContext(AuthContext);
   const [watchlist, setWatchlist] = useState([]);
   const [loading, setLoading] = useState(true);
-  const axiosInstance = useAxios();
+  const axiosInstance = useAxiosSecure();
 
   useEffect(() => {
     if (user) {

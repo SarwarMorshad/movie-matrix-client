@@ -5,7 +5,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import toast from "react-hot-toast";
 import { MdMovie, MdAdd } from "react-icons/md";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
-import useAxios from "../hooks/useAxios";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 import { Helmet } from "react-helmet-async";
 
 const MyCollection = () => {
@@ -15,7 +15,7 @@ const MyCollection = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [movieToDelete, setMovieToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  const axiosInstance = useAxios();
+  const axiosInstance = useAxiosSecure();
 
   useEffect(() => {
     if (user) {

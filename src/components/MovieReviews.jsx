@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { FiStar, FiEdit2, FiTrash2, FiSend } from "react-icons/fi";
 import toast from "react-hot-toast";
-import useAxios from "../hooks/useAxios";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const MovieReviews = ({ movieId }) => {
   const { user } = useContext(AuthContext);
@@ -16,7 +16,7 @@ const MovieReviews = ({ movieId }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingReview, setEditingReview] = useState(null);
   const [editHoverRating, setEditHoverRating] = useState(0);
-  const axiosInstance = useAxios();
+  const axiosInstance = useAxiosSecure();
 
   // Fetch reviews
   useEffect(() => {

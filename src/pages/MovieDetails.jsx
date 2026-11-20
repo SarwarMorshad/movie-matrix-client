@@ -5,7 +5,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import toast from "react-hot-toast";
 import { FiStar, FiCalendar, FiFilm, FiGlobe, FiEdit, FiTrash2 } from "react-icons/fi";
 import { MdMovie, MdPerson } from "react-icons/md";
-import useAxios from "../hooks/useAxios";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 import MovieReviews from "../components/MovieReviews";
 import ErrorPage from "./ErrorPage";
 import { Helmet } from "react-helmet-async";
@@ -18,7 +18,7 @@ const MovieDetails = () => {
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const axiosInstance = useAxios();
+  const axiosInstance = useAxiosSecure();
 
   useEffect(() => {
     fetchMovieDetails();

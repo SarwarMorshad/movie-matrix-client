@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { MdMovie } from "react-icons/md";
-import useAxios from "../hooks/useAxios";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 import { Helmet } from "react-helmet-async";
 
 const UpdateMovie = () => {
@@ -14,7 +14,7 @@ const UpdateMovie = () => {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const axiosInstance = useAxios();
+  const axiosInstance = useAxiosSecure();
 
   useEffect(() => {
     fetchMovie();
