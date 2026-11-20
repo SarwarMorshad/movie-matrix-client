@@ -4,6 +4,7 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import AllMovies from "../pages/AllMovies";
+import TvShows from "../pages/TvShows";
 import MovieDetails from "../pages/MovieDetails";
 import AddMovie from "../pages/AddMovie";
 import UpdateMovie from "../pages/UpdateMovie";
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
       {
         path: "/movies",
         element: <AllMovies />,
+      },
+      {
+        path: "/tv",
+        element: <TvShows />,
       },
       {
         path: "/movies/:id",
