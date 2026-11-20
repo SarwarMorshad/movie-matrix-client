@@ -8,7 +8,7 @@
   
   [![React](https://img.shields.io/badge/React-19.0+-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactjs.org/)
   [![Vite](https://img.shields.io/badge/Vite-7.0+-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
-  [![Tailwind](https://img.shields.io/badge/Tailwind-3.4+-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+  [![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
   [![Firebase](https://img.shields.io/badge/Firebase-Auth-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com/)
   [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
@@ -311,20 +311,20 @@ movie-matrix-client/
 ├── eslint.config.js          # ESLint configuration
 ├── index.html                # HTML entry point
 ├── package.json              # Dependencies & scripts
-├── postcss.config.js         # PostCSS configuration
-├── tailwind.config.js        # Tailwind CSS configuration
-├── vite.config.js            # Vite configuration
+├── vite.config.js            # Vite configuration (includes the Tailwind plugin)
 └── README.md                 # You are here! 📍
 ```
 
 ### Key Directories Explained
 
-- **`components/`** - Reusable, presentational components used across multiple pages
+- **`api/`** - Every request to the backend, in one file
+- **`components/ui/`** - Shared design-system pieces: `Button`, `Spinner`, `PosterCard`, `SectionHeader`
+- **`components/`** (other folders) - Reusable, presentational components used across pages
 - **`pages/`** - Route-level components, each representing a distinct page/view
-- **`hooks/`** - Custom React hooks for data fetching, authentication, etc.
-- **`context/` & `provider/`** - Global state management using React Context API
-- **`Routes/`** - Centralized routing logic and route protection
-- **`firebase/`** - Firebase configuration and initialization
+- **`context/`** - Auth context and provider (React Context API)
+- **`routes/`** - Centralized routing logic and route protection
+- **`config/`** - Firebase configuration and initialization
+- **`utils/`** - Small helpers such as `formatRuntime` and `formatRating`
 
 ---
 
@@ -359,7 +359,7 @@ VITE_API_URL=http://localhost:5000
 - ⚠️ **Never commit `.env.local` to Git!** It's already in `.gitignore`
 - All Vite environment variables must start with `VITE_` prefix
 - The app reads these using `import.meta.env.VITE_VARIABLE_NAME`
-- Firebase config is loaded in `src/firebase/firebase.init.js`
+- Firebase config is loaded in `src/config/firebase.js`
 - For production deployments, set these as environment variables in your hosting platform (Vercel, Netlify, etc.)
 
 ### 🔒 Security Best Practices
@@ -401,28 +401,23 @@ npm update
 
 ## 🎨 Customization
 
-### Tailwind Configuration
+### Tailwind CSS 4 + daisyUI 5
 
-Modify `tailwind.config.js` to customize:
+There is no `tailwind.config.js`. Tailwind 4 is configured in CSS, in `src/index.css`:
 
-- Colors and theme
-- Breakpoints
-- Spacing scale
-- Font families
-- Custom plugins
+- `@plugin "daisyui/theme"` defines the single dark theme (`moviematrix`). The app is dark-only.
+- `@theme` holds the design tokens for the new streaming design. Each token becomes a utility class:
 
-### DaisyUI Themes
+| Token | Utility examples | Use |
+| --- | --- | --- |
+| `--color-mm-bg` | `bg-mm-bg` | page background |
+| `--color-mm-surface` | `bg-mm-surface` | navbar, panels, cards |
+| `--color-mm-border` | `border-mm-border` | dividers and borders |
+| `--color-mm-ink` / `--color-mm-muted` | `text-mm-ink`, `text-mm-muted` | main and secondary text |
+| `--color-mm-accent` | `bg-mm-accent`, `text-mm-accent` | buttons, highlights, years |
+| `--font-display` | `font-display` | headings (Manrope) |
 
-The app uses DaisyUI for components. Change themes in `tailwind.config.js`:
-
-```javascript
-module.exports = {
-  // ...
-  daisyui: {
-    themes: ["light", "dark", "cupcake", "cyberpunk"], // Add your preferred themes
-  },
-};
-```
+Fonts (Inter, Manrope, Poppins) are loaded in `index.html`.
 
 ### Component Styling
 
