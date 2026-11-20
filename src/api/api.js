@@ -59,6 +59,15 @@ export const getWatchlist = () => data(api.get("/watchlist/me"));
 export const addToWatchlist = (movieId) => data(api.post("/watchlist", { movieId }));
 export const removeFromWatchlist = (movieId) => data(api.delete(`/watchlist/me/${movieId}`));
 
+// ---------- TV series (TMDB data via our server) ----------
+// Lists and searches return { results, page, totalPages, total }; each result is a series card
+export const getTvList = (list, page) => data(api.get(`/tv/lists/${list}`, { params: { page } })); // trending | popular | top_rated | airing_today | on_the_air
+export const getTvGenres = () => data(api.get("/tv/genres")); // [{ id, name }]
+export const discoverTv = (params) => data(api.get("/tv/discover", { params })); // { genre, sort, page }
+export const searchTv = (q, page) => data(api.get("/tv/search", { params: { q, page } }));
+export const getSeries = (id) => data(api.get(`/tv/${id}`));
+export const getSeason = (id, number) => data(api.get(`/tv/${id}/season/${number}`));
+
 // ---------- Users ----------
 export const saveUser = (user) => data(api.post("/users", user));
 export const getMe = () => data(api.get("/users/me"));
