@@ -1,81 +1,77 @@
 import { useEffect, useState } from "react";
-import HeroSection from "../components/home/HeroSection";
-import StatsSection from "../components/home/StatsSection";
-import TopRatedMovies from "../components/home/TopRatedMovies";
-import RecentMovies from "../components/home/RecentMovies";
-import GenreSection from "../components/home/GenreSection";
-import AboutSection from "../components/home/AboutSection";
-import LoadingSpinner from "../components/common/LoadingSpinner";
-import * as api from "../api/api";
 import { Helmet } from "react-helmet-async";
+import * as api from "../api/api";
+import HeroSlider from "../components/home/HeroSlider";
+import GenreGrid from "../components/home/GenreGrid";
+import { PosterCard, SectionHeader, Spinner } from "../components/ui";
+
+const Section = ({ id, eyebrow, title, action, children }) => (
+  <section aria-labelledby={id} className="mx-auto w-full max-w-[1180px] px-6 pt-12 pb-4">
+    <SectionHeader id={id} eyebrow={eyebrow} title={title} action={action} />
+    {children}
+  </section>
+);
+
+const PosterGrid = ({ movies, badge }) => (
+  <ul className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+    {movies.map((movie) => (
+      <li key={movie._id}>
+        <PosterCard movie={movie} badge={badge} />
+      </li>
+    ))}
+  </ul>
+);
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ totalMovies: 0, totalUsers: 0 });
-  const [topRatedMovies, setTopRatedMovies] = useState([]);
-  const [recentMovies, setRecentMovies] = useState([]);
+  const [topRated, setTopRated] = useState([]);
+  const [recent, setRecent] = useState([]);
+  const [genres, setGenres] = useState([]);
 
   useEffect(() => {
-    fetchHomeData();
+    // Each section loads on its own, so one failing request doesn't blank the page
+    Promise.allSettled([api.getTopRatedMovies(10), api.getRecentMovies(5), api.getGenreCounts()])
+      .then(([top, newest, genreCounts]) => {
+        if (top.status === "fulfilled") setTopRated(top.value);
+        if (newest.status === "fulfilled") setRecent(newest.value);
+        if (genreCounts.status === "fulfilled") setGenres(genreCounts.value);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const fetchHomeData = async () => {
-    try {
-      setLoading(true);
-
-      // Fetch all data in parallel
-      const [statsMovies, statsUsers, topRated, recent] = await Promise.all([
-        api.getMoviesCount(),
-        api.getUsersCount(),
-        api.getTopRatedMovies(),
-        api.getRecentMovies(),
-      ]);
-
-      setStats({
-        totalMovies: statsMovies.totalMovies,
-        totalUsers: statsUsers.totalUsers,
-      });
-      setTopRatedMovies(topRated);
-      setRecentMovies(recent);
-    } catch (error) {
-      console.error("Error fetching home data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  if (loading) return <Spinner fullPage label="Loading movies" />;
 
   return (
     <>
       <Helmet>
-        <title>Home - Movie Matrix</title>
+        <title>Movie Matrix · Discover and track movies</title>
         <meta
           name="description"
-          content="Welcome to Movie Matrix - Your ultimate movie collection and discovery platform."
+          content="Browse top rated and newly added movies, keep a watchlist and share reviews on Movie Matrix."
         />
       </Helmet>
-      <div className="min-h-screen bg-movie-dark mx-auto">
-        {/* Hero Section */}
-        <HeroSection movies={topRatedMovies} />
 
-        {/* Top Rated Movies Section */}
-        <TopRatedMovies movies={topRatedMovies} />
+      <HeroSlider movies={topRated.slice(0, 5)} />
 
-        {/* Recently Added Movies Section */}
-        <RecentMovies movies={recentMovies} />
+      {topRated.length > 0 && (
+        <Section id="top-rated" eyebrow="Top rated" title="Top Rated Movies" action={{ label: "View all", to: "/movies" }}>
+          <PosterGrid movies={topRated} />
+        </Section>
+      )}
 
-        {/* Genre Section */}
-        <GenreSection />
+      {recent.length > 0 && (
+        <Section id="recent" eyebrow="Just added" title="Recently Added" action={{ label: "View all", to: "/movies" }}>
+          <PosterGrid movies={recent} badge="New" />
+        </Section>
+      )}
 
-        {/* Statistics Section */}
-        <StatsSection stats={stats} />
+      {genres.length > 0 && (
+        <Section id="genres" eyebrow="Explore" title="Browse by Genre">
+          <GenreGrid genres={genres} />
+        </Section>
+      )}
 
-        {/* About Platform Section */}
-        <AboutSection />
-      </div>
+      <div className="pb-16" />
     </>
   );
 };
