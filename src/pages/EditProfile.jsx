@@ -322,7 +322,7 @@ const EditProfile = () => {
             </form>
 
             {/* Info Box */}
-            <div className="mt-6 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-6 border border-white/10">
+            <div className="mt-6 bg-linear-to-r from-primary/10 to-secondary/10 rounded-2xl p-6 border border-white/10">
               <h3 className="text-white font-bold mb-2 flex items-center gap-2">
                 <HiSparkles className="text-yellow-400" />
                 Profile Update Information

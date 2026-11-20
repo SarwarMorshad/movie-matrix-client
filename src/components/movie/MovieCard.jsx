@@ -59,7 +59,7 @@ const MovieCard = ({ movie }) => {
         )}
 
         {/* Poster Image */}
-        <div className="relative overflow-hidden aspect-[2/3]">
+        <div className="relative overflow-hidden aspect-2/3">
           <img
             src={movie.posterUrl}
             alt={movie.title}

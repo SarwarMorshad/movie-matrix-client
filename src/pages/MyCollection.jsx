@@ -70,7 +70,7 @@ const MyCollection = () => {
         <title>My Collection</title>
         <meta name="description" content="View and manage your personal movie collection on Movie Matrix." />
       </Helmet>
-      <div className="min-h-screen bg-base-100 max-w-11/12 mx-auto py-12">
+      <div className="min-h-screen bg-base-100 mx-auto py-12">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12 animate-fadeIn">
@@ -102,13 +102,13 @@ const MyCollection = () => {
                   <div className="bg-base-200 rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300">
                     {/* Poster */}
                     <Link to={`/movies/${movie._id}`}>
-                      <div className="relative aspect-[2/3] overflow-hidden">
+                      <div className="relative aspect-2/3 overflow-hidden">
                         <img
                           src={movie.posterUrl}
                           alt={movie.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       </div>
                     </Link>
 

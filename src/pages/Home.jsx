@@ -57,7 +57,7 @@ const Home = () => {
           content="Welcome to Movie Matrix - Your ultimate movie collection and discovery platform."
         />
       </Helmet>
-      <div className="min-h-screen bg-movie-dark max-w-11/12 mx-auto">
+      <div className="min-h-screen bg-movie-dark mx-auto">
         {/* Hero Section */}
         <HeroSection movies={topRatedMovies} />
 

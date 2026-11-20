@@ -50,7 +50,7 @@ const AddMovie = () => {
         <title>Add Movie - Movie Matrix</title>
         <meta name="description" content="Add a new movie to your collection on Movie Matrix." />
       </Helmet>
-      <div className="min-h-screen bg-base-100 max-w-11/12 mx-auto py-12 ">
+      <div className="min-h-screen bg-base-100 mx-auto py-12 ">
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Header */}
           <div className="text-center mb-10 animate-fadeIn">

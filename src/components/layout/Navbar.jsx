@@ -128,11 +128,11 @@ const Navbar = () => {
                 {/* Dropdown Menu - BEAUTIFUL TAILWIND DESIGN */}
                 <ul
                   tabIndex={0}
-                  className="menu dropdown-content mt-4 z-[1] w-80 bg-gradient-to-br from-base-200 to-base-300 rounded-2xl shadow-2xl border border-white/10 p-0 overflow-hidden animate-fade-in-down"
+                  className="menu dropdown-content mt-4 z-1 w-80 bg-linear-to-br from-base-200 to-base-300 rounded-2xl shadow-2xl border border-white/10 p-0 overflow-hidden animate-fade-in-down"
                 >
                   {/* User Info Header with Gradient */}
                   <li className="menu-title p-0 m-0">
-                    <div className="bg-gradient-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-4 rounded-t-2xl">
+                    <div className="bg-linear-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-4 rounded-t-2xl">
                       <div className="flex items-center gap-3">
                         {/* Large Avatar */}
                         <div className="avatar">
@@ -157,7 +157,7 @@ const Navbar = () => {
                   </li>
 
                   {/* Divider */}
-                  <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-2"></div>
+                  <div className="h-px bg-linear-to-r from-transparent via-white/20 to-transparent my-2"></div>
 
                   {/* Navigation Section */}
                   <div className="px-3 py-2">
@@ -169,7 +169,7 @@ const Navbar = () => {
                     <li className="mb-1">
                       <Link
                         to="/profile"
-                        className="group relative bg-gradient-to-r from-blue-500/10 to-blue-500/5 hover:from-blue-500/20 hover:to-blue-500/10 rounded-xl px-4 py-3 text-white hover:text-blue-400 transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-blue-500/20"
+                        className="group relative bg-linear-to-r from-blue-500/10 to-blue-500/5 hover:from-blue-500/20 hover:to-blue-500/10 rounded-xl px-4 py-3 text-white hover:text-blue-400 transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-blue-500/20"
                       >
                         <div className="flex items-center gap-4">
                           {/* Icon Badge */}
@@ -183,7 +183,7 @@ const Navbar = () => {
                           </div>
                         </div>
                         {/* Shine Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
                       </Link>
                     </li>
 
@@ -191,7 +191,7 @@ const Navbar = () => {
                     <li className="mb-1">
                       <Link
                         to="/my-collection"
-                        className="group relative bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 rounded-xl px-4 py-3 text-white hover:text-primary transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-primary/20"
+                        className="group relative bg-linear-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 rounded-xl px-4 py-3 text-white hover:text-primary transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-primary/20"
                       >
                         <div className="flex items-center gap-4">
                           {/* Icon Badge */}
@@ -205,7 +205,7 @@ const Navbar = () => {
                           </div>
                         </div>
                         {/* Shine Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
                       </Link>
                     </li>
 
@@ -213,7 +213,7 @@ const Navbar = () => {
                     <li className="mb-1">
                       <Link
                         to="/my-watchlist"
-                        className="group relative bg-gradient-to-r from-secondary/10 to-secondary/5 hover:from-secondary/20 hover:to-secondary/10 rounded-xl px-4 py-3 text-white hover:text-secondary transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-secondary/20"
+                        className="group relative bg-linear-to-r from-secondary/10 to-secondary/5 hover:from-secondary/20 hover:to-secondary/10 rounded-xl px-4 py-3 text-white hover:text-secondary transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-secondary/20"
                       >
                         <div className="flex items-center gap-4">
                           {/* Icon Badge */}
@@ -227,13 +227,13 @@ const Navbar = () => {
                           </div>
                         </div>
                         {/* Shine Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
                       </Link>
                     </li>
                   </div>
 
                   {/* Divider with More Space */}
-                  <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-3"></div>
+                  <div className="h-px bg-linear-to-r from-transparent via-white/20 to-transparent my-3"></div>
 
                   {/* Account Section */}
                   <div className="px-3 pb-3">
@@ -245,7 +245,7 @@ const Navbar = () => {
                     <li>
                       <button
                         onClick={handleLogout}
-                        className="group relative bg-gradient-to-r from-error/10 to-error/5 hover:from-error/20 hover:to-error/10 rounded-xl px-4 py-3 text-white hover:text-error transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-error/20 w-full"
+                        className="group relative bg-linear-to-r from-error/10 to-error/5 hover:from-error/20 hover:to-error/10 rounded-xl px-4 py-3 text-white hover:text-error transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-error/20 w-full"
                       >
                         <div className="flex items-center gap-4">
                           {/* Icon Badge */}
@@ -259,7 +259,7 @@ const Navbar = () => {
                           </div>
                         </div>
                         {/* Shine Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
                       </button>
                     </li>
                   </div>
@@ -316,7 +316,7 @@ const Navbar = () => {
             <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
               {user ? (
                 <>
-                  <div className="bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl p-4">
+                  <div className="bg-linear-to-r from-primary/20 to-secondary/20 rounded-xl p-4">
                     <div className="flex items-center space-x-3">
                       <div className="avatar">
                         <div className="w-12 rounded-full ring-2 ring-primary">

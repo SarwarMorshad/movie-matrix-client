@@ -41,7 +41,7 @@ const AboutSection = () => {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-b from-movie-darker via-movie-dark to-movie-darker relative overflow-hidden">
+    <section className="py-20 bg-linear-to-b from-movie-darker via-movie-dark to-movie-darker relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
@@ -54,7 +54,7 @@ const AboutSection = () => {
         <div className="text-center mb-20 animate-fadeIn">
           <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 font-heading">
             Your Ultimate
-            <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-gradient">
+            <span className="bg-linear-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-gradient">
               {" "}
               Movie Hub
             </span>
@@ -101,7 +101,7 @@ const AboutSection = () => {
               >
                 {/* Gradient Background Overlay */}
                 <div
-                  className={`absolute inset-0 bg-gradient-to-br ${highlight.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
+                  className={`absolute inset-0 bg-linear-to-br ${highlight.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
                 ></div>
 
                 {/* Content */}
@@ -110,7 +110,7 @@ const AboutSection = () => {
                   <div
                     className={`w-20 h-20 rounded-2xl ${highlight.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-lg group-hover:shadow-2xl`}
                   >
-                    <div className={`bg-gradient-to-br ${highlight.color} bg-clip-text text-transparent`}>
+                    <div className={`bg-linear-to-br ${highlight.color} bg-clip-text text-transparent`}>
                       {highlight.icon}
                     </div>
                   </div>
@@ -125,16 +125,16 @@ const AboutSection = () => {
                 </div>
 
                 {/* Shine Effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Call to Action Section - Enhanced */}
-        <div className="relative bg-gradient-to-br from-primary/20 via-secondary/20 to-primary/20 rounded-3xl p-12 md:p-16 border border-white/10 overflow-hidden group hover:border-white/20 transition-all duration-500">
+        <div className="relative bg-linear-to-br from-primary/20 via-secondary/20 to-primary/20 rounded-3xl p-12 md:p-16 border border-white/10 overflow-hidden group hover:border-white/20 transition-all duration-500">
           {/* Animated Background */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="absolute inset-0 bg-linear-to-r from-primary/10 to-secondary/10 opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
 
@@ -149,7 +149,7 @@ const AboutSection = () => {
             {/* Heading */}
             <h3 className="text-4xl md:text-5xl font-bold text-white mb-4 font-heading">
               Ready to Start Your
-              <span className="block mt-2 bg-gradient-to-r from-primary via-yellow-400 to-secondary bg-clip-text text-transparent">
+              <span className="block mt-2 bg-linear-to-r from-primary via-yellow-400 to-secondary bg-clip-text text-transparent">
                 Movie Journey?
               </span>
             </h3>
@@ -162,7 +162,7 @@ const AboutSection = () => {
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link to="/plans">
-                <button className="btn bg-gradient-to-r from-primary to-secondary hover:from-red-700 hover:to-yellow-600 text-white border-none px-8 text-lg shadow-lg hover:shadow-2xl hover:shadow-primary/50 transition-all duration-300 hover:scale-105">
+                <button className="btn bg-linear-to-r from-primary to-secondary hover:from-red-700 hover:to-yellow-600 text-white border-none px-8 text-lg shadow-lg hover:shadow-2xl hover:shadow-primary/50 transition-all duration-300 hover:scale-105">
                   <HiSparkles className="group-hover:animate-spin" />
                   View Our Plans
                   <FiArrowRight className="group-hover:translate-x-2 transition-transform duration-300" />
@@ -181,9 +181,9 @@ const AboutSection = () => {
         {/* Bottom Decorative Element */}
         <div className="text-center mt-20 opacity-50">
           <div className="inline-flex items-center gap-2 text-gray-600">
-            <div className="w-12 h-px bg-gradient-to-r from-transparent to-gray-600"></div>
+            <div className="w-12 h-px bg-linear-to-r from-transparent to-gray-600"></div>
             <MdMovie className="text-2xl" />
-            <div className="w-12 h-px bg-gradient-to-l from-transparent to-gray-600"></div>
+            <div className="w-12 h-px bg-linear-to-l from-transparent to-gray-600"></div>
           </div>
         </div>
       </div>

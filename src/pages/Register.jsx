@@ -133,7 +133,7 @@ const Register = () => {
           content="Create a new account on Movie Matrix to start exploring and managing your movie collection."
         />
       </Helmet>
-      <div className="min-h-screen flex items-center justify-center bg-base-100 max-w-11/12 mx-auto px-4 py-12">
+      <div className="min-h-screen flex items-center justify-center bg-base-100 mx-auto px-4 py-12">
         <div className="w-full max-w-md">
           {/* Logo & Title */}
           <div className="text-center mb-8 animate-fadeIn">

@@ -13,7 +13,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="relative bg-gradient-to-b from-movie-darker to-black border-t border-primary/20 mt-20 overflow-hidden">
+    <footer className="relative bg-linear-to-b from-movie-darker to-black border-t border-primary/20 mt-20 overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-10 left-10 w-72 h-72 bg-primary rounded-full blur-3xl"></div>

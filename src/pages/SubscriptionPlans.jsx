@@ -57,7 +57,7 @@ const SubscriptionPlans = () => {
       bgColor: "bg-primary/10",
       borderColor: "border-primary/20",
       buttonText: "Upgrade to Pro",
-      buttonStyle: "bg-gradient-to-r from-primary to-secondary hover:from-red-700 hover:to-yellow-600",
+      buttonStyle: "bg-linear-to-r from-primary to-secondary hover:from-red-700 hover:to-yellow-600",
       popular: true,
     },
     {
@@ -83,7 +83,7 @@ const SubscriptionPlans = () => {
       bgColor: "bg-purple-500/10",
       borderColor: "border-purple-500/20",
       buttonText: "Upgrade to Premium",
-      buttonStyle: "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
+      buttonStyle: "bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
       popular: false,
     },
   ];
@@ -104,7 +104,7 @@ const SubscriptionPlans = () => {
           content="Explore the subscription plans for Movie Matrix and choose the one that best fits your movie management needs."
         />
       </Helmet>
-      <div className="min-h-screen bg-gradient-to-b from-movie-darker via-movie-dark to-movie-darker py-20 container mx-auto">
+      <div className="min-h-screen bg-linear-to-b from-movie-darker via-movie-dark to-movie-darker py-20 container mx-auto">
         {/* Animated Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
@@ -121,7 +121,7 @@ const SubscriptionPlans = () => {
 
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 font-heading">
               Choose Your
-              <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
                 {" "}
                 Perfect Plan
               </span>
@@ -176,7 +176,7 @@ const SubscriptionPlans = () => {
                   {/* Popular Badge */}
                   {plan.popular && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <div className="bg-gradient-to-r from-primary to-secondary text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
+                      <div className="bg-linear-to-r from-primary to-secondary text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
                         <FiStar className="text-yellow-300" />
                         Most Popular
                       </div>
@@ -185,7 +185,7 @@ const SubscriptionPlans = () => {
 
                   {/* Gradient Overlay */}
                   <div
-                    className={`absolute inset-0 bg-gradient-to-br ${plan.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500 rounded-3xl`}
+                    className={`absolute inset-0 bg-linear-to-br ${plan.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500 rounded-3xl`}
                   ></div>
 
                   <div className="relative z-10">
@@ -193,7 +193,7 @@ const SubscriptionPlans = () => {
                     <div
                       className={`w-20 h-20 rounded-2xl ${plan.bgColor} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500`}
                     >
-                      <div className={`bg-gradient-to-br ${plan.color} bg-clip-text text-transparent`}>
+                      <div className={`bg-linear-to-br ${plan.color} bg-clip-text text-transparent`}>
                         {plan.icon}
                       </div>
                     </div>
@@ -234,11 +234,11 @@ const SubscriptionPlans = () => {
                       {plan.features.map((feature, idx) => (
                         <div key={idx} className="flex items-start gap-3">
                           {feature.included ? (
-                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center mt-0.5">
+                            <div className="shrink-0 w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center mt-0.5">
                               <FiCheck className="text-green-400 text-sm" />
                             </div>
                           ) : (
-                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-500/20 flex items-center justify-center mt-0.5">
+                            <div className="shrink-0 w-6 h-6 rounded-full bg-gray-500/20 flex items-center justify-center mt-0.5">
                               <FiX className="text-gray-500 text-sm" />
                             </div>
                           )}
@@ -296,7 +296,7 @@ const SubscriptionPlans = () => {
           </div>
 
           {/* Bottom CTA */}
-          <div className="text-center mt-16 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl p-12 border border-white/10">
+          <div className="text-center mt-16 bg-linear-to-r from-primary/20 to-secondary/20 rounded-3xl p-12 border border-white/10">
             <HiLightningBolt className="text-6xl text-primary mx-auto mb-4" />
             <h3 className="text-3xl font-bold text-white mb-4">Still have questions?</h3>
             <p className="text-gray-400 text-lg mb-6">Our team is here to help you choose the perfect plan</p>

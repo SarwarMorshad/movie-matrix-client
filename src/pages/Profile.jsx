@@ -86,7 +86,7 @@ const Profile = () => {
       </Helmet>
       <div className="container mx-auto px-4 py-12">
         {/* Profile Header */}
-        <div className="bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl p-8 mb-8 border border-white/10 shadow-2xl">
+        <div className="bg-linear-to-r from-primary/20 to-secondary/20 rounded-3xl p-8 mb-8 border border-white/10 shadow-2xl">
           <div className="flex flex-col md:flex-row items-center gap-8">
             {/* Avatar */}
             <div className="relative">
@@ -275,7 +275,7 @@ const Profile = () => {
         </div>
 
         {/* Activity Summary */}
-        <div className="mt-8 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl p-8 border border-white/10">
+        <div className="mt-8 bg-linear-to-br from-blue-500/10 to-purple-500/10 rounded-2xl p-8 border border-white/10">
           <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-3">
             <FiFilm className="text-blue-400" />
             Your Movie Journey
