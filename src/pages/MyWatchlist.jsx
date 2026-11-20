@@ -22,7 +22,7 @@ const MyWatchlist = () => {
   const fetchWatchlist = async () => {
     try {
       setLoading(true);
-      setWatchlist(await api.getWatchlist(user.email));
+      setWatchlist(await api.getWatchlist());
     } catch (error) {
       console.error("Error fetching watchlist:", error);
       toast.error("Failed to load watchlist");
@@ -33,7 +33,7 @@ const MyWatchlist = () => {
 
   const removeFromWatchlist = async (movieId) => {
     try {
-      await api.removeFromWatchlist(user.email, movieId);
+      await api.removeFromWatchlist(movieId);
       setWatchlist(watchlist.filter((movie) => movie._id !== movieId));
       toast.success("Removed from watchlist");
     } catch (error) {

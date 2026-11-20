@@ -19,11 +19,13 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// A 401 means the session is missing or expired: sign out and go to login.
+// Sign out only when the server says it rejected the token (TOKEN_INVALID).
+// getIdToken() already refreshes expired tokens, so other errors, such as a
+// server problem, never log the user out.
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
-    if (error.response?.status === 401 && auth.currentUser) {
+    if (error.response?.data?.code === "TOKEN_INVALID" && auth.currentUser) {
       await signOut(auth);
       if (window.location.pathname !== "/login") window.location.assign("/login");
     }
@@ -50,11 +52,10 @@ export const addReview = (review) => data(api.post("/reviews", review));
 export const updateReview = (id, review) => data(api.put(`/reviews/${id}`, review));
 export const deleteReview = (id) => data(api.delete(`/reviews/${id}`));
 
-// ---------- Watchlist ----------
-export const getWatchlist = (email) => data(api.get(`/watchlist/${encodeURIComponent(email)}`));
+// ---------- Watchlist (always the logged-in user's own list) ----------
+export const getWatchlist = () => data(api.get("/watchlist/me"));
 export const addToWatchlist = (movieId) => data(api.post("/watchlist", { movieId }));
-export const removeFromWatchlist = (email, movieId) =>
-  data(api.delete(`/watchlist/${encodeURIComponent(email)}/${movieId}`));
+export const removeFromWatchlist = (movieId) => data(api.delete(`/watchlist/me/${movieId}`));
 
 // ---------- Users ----------
 export const saveUser = (user) => data(api.post("/users", user));
