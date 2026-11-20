@@ -1,262 +1,287 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
-import MovieCard from "../components/movie/MovieCard";
-import LoadingSpinner from "../components/common/LoadingSpinner";
-import { FiSearch, FiFilter } from "react-icons/fi";
-import toast from "react-hot-toast";
-import * as api from "../api/api";
 import { Helmet } from "react-helmet-async";
+import { FiSearch, FiX } from "react-icons/fi";
+import * as api from "../api/api";
+import { Button, Pagination, PosterCard } from "../components/ui";
+
+const PAGE_SIZE = 20;
+const SORT_OPTIONS = [
+  { value: "rating", label: "Top rated" },
+  { value: "newest", label: "Newest releases" },
+  { value: "added", label: "Recently added" },
+  { value: "title", label: "Title A–Z" },
+];
+const RATING_OPTIONS = [
+  { value: "", label: "Any rating" },
+  { value: "7", label: "7+" },
+  { value: "8", label: "8+" },
+  { value: "9", label: "9+" },
+];
+
+const fieldClass =
+  "h-11 w-full rounded-card border border-mm-field bg-mm-bg px-3 text-[15px] text-mm-ink focus:border-mm-accent focus:outline-none";
+
+const Field = ({ id, label, children, className = "" }) => (
+  <div className={`flex flex-col gap-1.5 ${className}`}>
+    <label htmlFor={id} className="text-xs font-semibold text-mm-muted">
+      {label}
+    </label>
+    {children}
+  </div>
+);
+
+const SkeletonGrid = () => (
+  <ul aria-hidden="true" className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+    {Array.from({ length: 10 }, (_, i) => (
+      <li key={i} className="flex flex-col gap-2.5">
+        <div className="aspect-2/3 animate-pulse rounded-card bg-mm-raised" />
+        <div className="h-4 w-3/4 animate-pulse rounded bg-mm-raised" />
+        <div className="h-3 w-1/2 animate-pulse rounded bg-mm-raised" />
+      </li>
+    ))}
+  </ul>
+);
 
 const AllMovies = () => {
-  const [movies, setMovies] = useState([]);
-  const [filteredMovies, setFilteredMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  // ?search= (navbar search) and ?genre= (home genre tiles) pre-fill the filters
-  const [searchParams] = useSearchParams();
-  const urlSearch = searchParams.get("search") || "";
-  const urlGenre = searchParams.get("genre") || "";
-  const [searchTerm, setSearchTerm] = useState(urlSearch);
-  const [showFilters, setShowFilters] = useState(false);
+  // Every filter lives in the URL, so results are shareable and Back works
+  const [params, setParams] = useSearchParams();
+  const search = params.get("search") || "";
+  const genre = params.get("genre") || "";
+  const language = params.get("language") || "";
+  const minRating = params.get("minRating") || "";
+  const sort = params.get("sort") || "rating";
+  const page = Math.max(parseInt(params.get("page"), 10) || 1, 1);
 
-  // Filter states
-  const [selectedGenres, setSelectedGenres] = useState(urlGenre ? [urlGenre] : []);
+  const [searchInput, setSearchInput] = useState(search);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(false);
+  const [genres, setGenres] = useState([]);
+  const [languages, setLanguages] = useState([]);
 
-  // Searching again from the navbar while already on this page updates the filters
+  // Change one filter (empty value removes it) and go back to page 1
+  const update = (changes, { replace = false } = {}) => {
+    const next = new URLSearchParams(params);
+    Object.entries(changes).forEach(([key, value]) => (value ? next.set(key, value) : next.delete(key)));
+    if (!("page" in changes)) next.delete("page");
+    setParams(next, { replace });
+  };
+
+  // Genre chips and language options
   useEffect(() => {
-    setSearchTerm(urlSearch);
-    setSelectedGenres(urlGenre ? [urlGenre] : []);
-  }, [urlSearch, urlGenre]);
-  const [minRating, setMinRating] = useState(0);
-  const [maxRating, setMaxRating] = useState(10);
-
-  const genres = [
-    "Action",
-    "Animation",
-    "Biography",
-    "Comedy",
-    "Crime",
-    "Drama",
-    "Fantasy",
-    "Horror",
-    "Mystery",
-    "Romance",
-    "Sci-Fi",
-    "Thriller",
-    "War",
-    "Western",
-  ];
-
-  useEffect(() => {
-    fetchMovies();
+    api.getGenreCounts().then(setGenres).catch(() => {});
+    api.getLanguageCounts().then(setLanguages).catch(() => {});
   }, []);
 
+  // Keep the box in sync when the search changes from outside (navbar search, Back)
+  useEffect(() => setSearchInput(search), [search]);
+
+  // Search as you type, 400 ms after the last keystroke
   useEffect(() => {
-    applyFilters();
-  }, [movies, searchTerm, selectedGenres, minRating, maxRating]);
+    if (searchInput.trim() === search) return;
+    const timer = setTimeout(() => update({ search: searchInput.trim() }, { replace: true }), 400);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput]);
 
-  const fetchMovies = async () => {
-    try {
-      setLoading(true);
-      setMovies(await api.getMovies());
-    } catch (error) {
-      console.error("Error fetching movies:", error);
-      toast.error("Failed to load movies");
-    } finally {
-      setLoading(false);
-    }
+  // Load the current page of results
+  useEffect(() => {
+    let cancelled = false;
+    setError(false);
+    api
+      .browseMovies({
+        search: search || undefined,
+        genre: genre || undefined,
+        language: language || undefined,
+        minRating: minRating || undefined,
+        sort,
+        page,
+        limit: PAGE_SIZE,
+      })
+      .then((data) => !cancelled && setResult(data))
+      .catch(() => !cancelled && setError(true));
+    return () => {
+      cancelled = true;
+    };
+  }, [search, genre, language, minRating, sort, page]);
+
+  const goToPage = (p) => {
+    update({ page: p > 1 ? String(p) : "" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const applyFilters = () => {
-    let filtered = [...movies];
-
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter((movie) => movie.title.toLowerCase().includes(searchTerm.toLowerCase()));
-    }
-
-    // Genre filter (multiple genres using $in logic)
-    if (selectedGenres.length > 0) {
-      filtered = filtered.filter((movie) => selectedGenres.includes(movie.genre));
-    }
-
-    // Rating filter (using $gte and $lte logic)
-    filtered = filtered.filter((movie) => movie.rating >= minRating && movie.rating <= maxRating);
-
-    setFilteredMovies(filtered);
-  };
-
-  const handleGenreToggle = (genre) => {
-    setSelectedGenres((prev) => (prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre]));
-  };
-
+  const hasFilters = Boolean(search || genre || language || minRating);
   const clearFilters = () => {
-    setSelectedGenres([]);
-    setMinRating(0);
-    setMaxRating(10);
-    setSearchTerm("");
-    toast.success("Filters cleared");
+    setSearchInput("");
+    setParams(sort !== "rating" ? { sort } : {});
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  const movies = result?.movies ?? [];
+  const from = result ? (result.page - 1) * result.limit + 1 : 0;
+  const to = result ? from + movies.length - 1 : 0;
 
   return (
     <>
       <Helmet>
-        <title>Movies</title>
-        <meta name="description" content="Browse all movies in the Movie Matrix collection." />
+        <title>{genre ? `${genre} movies` : "All movies"} · Movie Matrix</title>
+        <meta name="description" content="Browse, search and filter every movie on Movie Matrix." />
       </Helmet>
-      <div className="min-h-screen bg-base-100 py-12 max-w=11/12 mx-auto">
-        <div className="container mx-auto px-4">
-          {/* Header */}
-          <div className="text-center mb-8 animate-fadeIn">
-            <h1 className="text-4xl md:text-5xl font-bold text-white font-heading mb-4">All Movies</h1>
-            <p className="text-gray-400 text-lg">
-              Browse through our complete collection of {movies.length} movies
+
+      <div className="border-b border-mm-border bg-mm-surface">
+        <div className="mx-auto flex max-w-[1180px] flex-col gap-5 px-6 pt-9 pb-7">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="mb-1.5 font-display text-xs font-bold tracking-[0.16em] text-mm-accent uppercase">Browse</p>
+              <h1 className="font-display text-4xl font-extrabold text-mm-ink">{genre ? `${genre} Movies` : "All Movies"}</h1>
+            </div>
+            <p aria-live="polite" className="text-sm text-mm-muted">
+              {result && (result.total ? `Showing ${from}–${to} of ${result.total} movies` : "No movies found")}
             </p>
           </div>
 
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto mb-6">
-            <div className="relative">
-              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-              <input
-                type="text"
-                placeholder="Search movies by title..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input-field pl-12 w-full"
-              />
-            </div>
-          </div>
-
-          {/* Filter Toggle Button */}
-          <div className="text-center mb-8">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="btn btn-primary  inline-flex items-center gap-2"
-            >
-              <FiFilter className="text-xl" />
-              {showFilters ? "Hide Filters" : "Advanced Filters"}
-            </button>
-          </div>
-
-          {/* Advanced Filters */}
-          {showFilters && (
-            <div className="max-w-5xl mx-auto mb-8 bg-base-200 rounded-2xl p-6 animate-slideDown">
-              {/* Genre Filter */}
-              <div className="mb-6">
-                <h3 className="text-white font-semibold text-lg mb-3 flex items-center gap-2">
-                  <span>Filter by Genre</span>
-                  {selectedGenres.length > 0 && (
-                    <span className="text-sm bg-primary px-2 py-1 rounded-full">
-                      {selectedGenres.length} selected
-                    </span>
-                  )}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {genres.map((genre) => (
-                    <button
-                      key={genre}
-                      onClick={() => handleGenreToggle(genre)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                        selectedGenres.includes(genre)
-                          ? "bg-primary text-white"
-                          : "bg-base-300 text-gray-400 hover:bg-base-100 hover:text-white"
-                      }`}
-                    >
-                      {genre}
-                    </button>
-                  ))}
-                </div>
+          <form role="search" onSubmit={(e) => e.preventDefault()} className="flex flex-wrap items-end gap-3">
+            <Field id="filter-search" label="Search" className="min-w-[240px] flex-[3_1_280px]">
+              <div className="relative">
+                <FiSearch aria-hidden="true" className="absolute top-1/2 left-3 -translate-y-1/2 text-mm-muted" />
+                <input
+                  id="filter-search"
+                  type="search"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="Search by title..."
+                  className={`${fieldClass} pl-9`}
+                />
               </div>
+            </Field>
+            <Field id="filter-language" label="Language" className="flex-[1_1_150px]">
+              <select
+                id="filter-language"
+                value={language}
+                onChange={(e) => update({ language: e.target.value })}
+                className={fieldClass}
+              >
+                <option value="">All languages</option>
+                {languages.map((l) => (
+                  <option key={l.language} value={l.language}>
+                    {l.language} ({l.count})
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field id="filter-rating" label="Rating" className="flex-[1_1_130px]">
+              <select
+                id="filter-rating"
+                value={minRating}
+                onChange={(e) => update({ minRating: e.target.value })}
+                className={fieldClass}
+              >
+                {RATING_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field id="filter-sort" label="Sort by" className="flex-[1_1_150px]">
+              <select
+                id="filter-sort"
+                value={sort}
+                onChange={(e) => update({ sort: e.target.value === "rating" ? "" : e.target.value })}
+                className={fieldClass}
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </form>
 
-              {/* Rating Range Filter */}
-              <div className="mb-6">
-                <h3 className="text-white font-semibold text-lg mb-3">Filter by Rating Range</h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-gray-400 text-sm mb-2">Minimum Rating: {minRating}</label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="10"
-                      step="0.1"
-                      value={minRating}
-                      onChange={(e) => setMinRating(parseFloat(e.target.value))}
-                      className="range range-primary w-full"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>0</span>
-                      <span>5</span>
-                      <span>10</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-gray-400 text-sm mb-2">Maximum Rating: {maxRating}</label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="10"
-                      step="0.1"
-                      value={maxRating}
-                      onChange={(e) => setMaxRating(parseFloat(e.target.value))}
-                      className="range range-primary w-full"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>0</span>
-                      <span>5</span>
-                      <span>10</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Clear Filters Button */}
-              <div className="text-center">
-                <button onClick={clearFilters} className="btn btn-outline text-white border-white">
-                  Clear All Filters
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Results Info */}
-          <div className="text-center mb-6">
-            <p className="text-gray-400">
-              Showing {filteredMovies.length} of {movies.length} movies
-              {selectedGenres.length > 0 && (
-                <span className="text-primary ml-2">(Filtered by: {selectedGenres.join(", ")})</span>
-              )}
-            </p>
-          </div>
-
-          {/* Movies Grid */}
-          {filteredMovies.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {filteredMovies.map((movie, index) => (
-                <div
-                  key={movie._id}
-                  className="animate-fadeIn"
-                  style={{ animationDelay: `${index * 0.05}s` }}
+          <div role="group" aria-label="Genre" className="flex flex-wrap gap-2">
+            {[{ genre: "", count: null }, ...genres].map((g) => {
+              const active = g.genre === genre;
+              return (
+                <button
+                  key={g.genre || "all"}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => update({ genre: g.genre })}
+                  className={`h-9 rounded-full border px-3.5 text-[13px] font-semibold transition-colors ${
+                    active
+                      ? "border-mm-accent bg-mm-accent text-mm-on-accent"
+                      : "border-mm-field text-mm-ink/85 hover:border-mm-muted hover:text-mm-ink"
+                  }`}
                 >
-                  <MovieCard movie={movie} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20">
-              <p className="text-gray-400 text-xl mb-4">No movies found</p>
-              <button onClick={clearFilters} className="btn-primary">
-                Clear Filters
+                  {g.genre || "All"}
+                  {g.count != null && <span className={active ? "" : "text-mm-muted"}> · {g.count}</span>}
+                </button>
+              );
+            })}
+          </div>
+
+          {hasFilters && (
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="text-mm-muted">Active:</span>
+              {search && <Chip label={`“${search}”`} onRemove={() => update({ search: "" })} />}
+              {language && <Chip label={language} onRemove={() => update({ language: "" })} />}
+              {minRating && <Chip label={`Rating ${minRating}+`} onRemove={() => update({ minRating: "" })} />}
+              <button type="button" onClick={clearFilters} className="ml-1 font-semibold text-mm-accent hover:underline">
+                Clear all
               </button>
             </div>
           )}
         </div>
       </div>
+
+      <section aria-label="Results" className="mx-auto flex w-full max-w-[1180px] flex-col gap-10 px-6 pt-9 pb-16">
+        {error ? (
+          <EmptyState title="Couldn't load movies" text="Please check your connection and try again.">
+            <Button onClick={() => window.location.reload()}>Try again</Button>
+          </EmptyState>
+        ) : !result ? (
+          <SkeletonGrid />
+        ) : movies.length === 0 ? (
+          <EmptyState title="No movies match these filters" text="Try another genre or search, or clear the filters.">
+            <Button onClick={clearFilters}>Clear filters</Button>
+          </EmptyState>
+        ) : (
+          <>
+            <ul className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {movies.map((movie) => (
+                <li key={movie._id}>
+                  <PosterCard movie={movie} />
+                </li>
+              ))}
+            </ul>
+            <Pagination page={result.page} totalPages={result.totalPages} onChange={goToPage} />
+          </>
+        )}
+      </section>
     </>
   );
 };
+
+const Chip = ({ label, onRemove }) => (
+  <span className="flex h-8 items-center gap-1.5 rounded-full border border-mm-accent pr-1.5 pl-3 text-mm-ink">
+    {label}
+    <button
+      type="button"
+      onClick={onRemove}
+      aria-label={`Remove filter ${label}`}
+      className="flex size-6 items-center justify-center rounded-full hover:bg-white/10"
+    >
+      <FiX aria-hidden="true" />
+    </button>
+  </span>
+);
+
+const EmptyState = ({ title, text, children }) => (
+  <div className="flex flex-col items-center gap-3 rounded-lg border border-mm-border bg-mm-surface px-6 py-16 text-center">
+    <p className="font-display text-2xl font-extrabold text-mm-ink">{title}</p>
+    <p className="text-mm-muted">{text}</p>
+    <div className="mt-2">{children}</div>
+  </div>
+);
 
 export default AllMovies;
