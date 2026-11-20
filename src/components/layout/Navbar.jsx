@@ -1,54 +1,21 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router";
-import { FiChevronDown, FiFilm, FiHeart, FiLogOut, FiMenu, FiPlus, FiSearch, FiUser, FiX } from "react-icons/fi";
+import { FiChevronDown, FiFilm, FiHeart, FiLogOut, FiPlus, FiSearch, FiUser, FiX } from "react-icons/fi";
 import { AuthContext } from "../../context/AuthContext";
-import Button from "../ui/Button";
 import Logo from "./Logo";
 
-const linkClass = ({ isActive }) =>
-  `font-display text-sm font-bold tracking-[0.04em] uppercase transition-colors ${
-    isActive ? "text-mm-accent" : "text-mm-ink hover:text-mm-accent"
-  }`;
+// Netflix-style top bar: transparent over the home hero, solid once you scroll,
+// small text links, an expanding search, and a square avatar menu.
 
-// Search box: sends the user to All Movies with ?search=
-const SearchForm = ({ className = "", onDone }) => {
-  const navigate = useNavigate();
-  const [query, setQuery] = useState("");
+const NAV_LINKS = [
+  { to: "/", label: "Home", end: true },
+  { to: "/movies", label: "Movies" },
+  { to: "/my-watchlist", label: "My List", auth: true },
+  { to: "/my-collection", label: "My Collection", auth: true },
+];
 
-  const submit = (e) => {
-    e.preventDefault();
-    const q = query.trim();
-    navigate(q ? `/movies?search=${encodeURIComponent(q)}` : "/movies");
-    setQuery("");
-    onDone?.();
-  };
-
-  return (
-    <form role="search" onSubmit={submit} className={`flex h-[42px] overflow-hidden rounded-card bg-white ${className}`}>
-      <label htmlFor="nav-search" className="sr-only">
-        Search movies
-      </label>
-      <input
-        id="nav-search"
-        type="search"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search movies..."
-        className="min-w-0 flex-1 bg-transparent px-3.5 text-sm text-mm-bg placeholder:text-gray-500 focus:outline-none"
-      />
-      <button type="submit" aria-label="Search" className="flex w-11 items-center justify-center text-mm-bg hover:text-black">
-        <FiSearch className="text-lg" aria-hidden="true" />
-      </button>
-    </form>
-  );
-};
-
-// Avatar button with Profile / Collection / Watchlist / Log out
-const UserMenu = ({ user, onLogout }) => {
-  const [open, setOpen] = useState(false);
-  const [imageFailed, setImageFailed] = useState(false);
-  const ref = useRef(null);
-
+// Closes a popup on outside click or Escape
+const useDismiss = (open, setOpen, ref) => {
   useEffect(() => {
     if (!open) return;
     const close = (e) => {
@@ -60,10 +27,135 @@ const UserMenu = ({ user, onLogout }) => {
       document.removeEventListener("mousedown", close);
       document.removeEventListener("keydown", close);
     };
+  }, [open, setOpen, ref]);
+};
+
+// Search icon that opens into a box; Enter goes to All Movies with ?search=
+const ExpandingSearch = () => {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
   }, [open]);
 
+  const submit = (e) => {
+    e.preventDefault();
+    const q = query.trim();
+    if (!q) return;
+    navigate(`/movies?search=${encodeURIComponent(q)}`);
+  };
+
+  const close = () => {
+    setQuery("");
+    setOpen(false);
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Search movies"
+        className="flex size-10 items-center justify-center text-xl text-mm-ink hover:text-mm-accent"
+      >
+        <FiSearch aria-hidden="true" />
+      </button>
+    );
+  }
+
+  return (
+    <form
+      role="search"
+      onSubmit={submit}
+      onKeyDown={(e) => e.key === "Escape" && close()}
+      onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && !query && close()}
+      className="flex h-10 w-[min(70vw,260px)] items-center gap-2 border border-white/80 bg-black/80 px-2.5 motion-safe:animate-[searchOpen_200ms_ease-out]"
+    >
+      <FiSearch aria-hidden="true" className="shrink-0 text-lg text-mm-ink" />
+      <label htmlFor="nav-search" className="sr-only">
+        Search movies
+      </label>
+      <input
+        id="nav-search"
+        ref={inputRef}
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Titles, genres, people"
+        className="min-w-0 flex-1 bg-transparent text-sm text-mm-ink placeholder:text-mm-muted focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+      />
+      <button type="button" onClick={close} aria-label="Close search" className="shrink-0 text-mm-muted hover:text-mm-ink">
+        <FiX aria-hidden="true" />
+      </button>
+    </form>
+  );
+};
+
+// "Browse" dropdown that replaces the links on small screens
+const BrowseMenu = ({ links }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useDismiss(open, setOpen, ref);
+
+  return (
+    <div ref={ref} className="relative lg:hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="flex h-10 items-center gap-1 text-sm font-semibold text-mm-ink"
+      >
+        Browse <FiChevronDown aria-hidden="true" className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute top-full left-1/2 z-50 mt-3 w-56 -translate-x-1/2 border-t-2 border-mm-ink bg-black/95 py-2"
+        >
+          {links.map((l) => (
+            <NavLink
+              key={l.to}
+              to={l.to}
+              end={l.end}
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `block py-3 text-center text-sm hover:bg-white/5 ${isActive ? "font-bold text-mm-ink" : "text-mm-muted"}`
+              }
+            >
+              {l.label}
+            </NavLink>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Square avatar + caret, opening the account menu
+const ProfileMenu = ({ user, onLogout }) => {
+  const [open, setOpen] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  const ref = useRef(null);
+  useDismiss(open, setOpen, ref);
+
   const initial = (user.displayName || user.email || "?").charAt(0).toUpperCase();
-  const item = "flex items-center gap-3 rounded-card px-3 py-2.5 text-sm text-mm-ink hover:bg-white/5";
+  const avatar = (size) => (
+    <span
+      className={`flex ${size} shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-mm-accent font-display font-extrabold text-mm-on-accent`}
+    >
+      {user.photoURL && !imageFailed ? (
+        <img src={user.photoURL} alt="" referrerPolicy="no-referrer" onError={() => setImageFailed(true)} className="size-full object-cover" />
+      ) : (
+        initial
+      )}
+    </span>
+  );
+  const item = "flex items-center gap-3 px-4 py-2.5 text-sm text-mm-ink hover:underline";
 
   return (
     <div ref={ref} className="relative">
@@ -73,47 +165,43 @@ const UserMenu = ({ user, onLogout }) => {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Account menu"
-        className="flex items-center gap-1.5 rounded-full p-0.5 text-mm-muted hover:text-mm-ink"
+        className="flex items-center gap-2 text-mm-ink"
       >
-        <span className="flex size-[42px] items-center justify-center overflow-hidden rounded-full bg-mm-raised font-display font-extrabold text-mm-accent">
-          {user.photoURL && !imageFailed ? (
-            <img
-              src={user.photoURL}
-              alt=""
-              referrerPolicy="no-referrer"
-              onError={() => setImageFailed(true)}
-              className="size-full object-cover"
-            />
-          ) : (
-            initial
-          )}
-        </span>
-        <FiChevronDown aria-hidden="true" className={`transition-transform ${open ? "rotate-180" : ""}`} />
+        {avatar("size-8")}
+        <FiChevronDown aria-hidden="true" className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div
-          role="menu"
-          className="absolute right-0 z-50 mt-3 w-64 rounded-lg border border-mm-border bg-mm-surface p-2 shadow-2xl shadow-black/50"
-        >
-          <div className="border-b border-mm-border px-3 pt-2 pb-3">
-            <p className="truncate font-display font-extrabold text-mm-ink">{user.displayName || "Member"}</p>
-            <p className="truncate text-xs text-mm-muted">{user.email}</p>
+        <div role="menu" className="absolute top-full right-0 z-50 mt-4 w-60 border border-white/15 bg-black/95 shadow-2xl">
+          <div className="flex items-center gap-3 px-4 py-3">
+            {avatar("size-8")}
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-mm-ink">{user.displayName || "Member"}</p>
+              <p className="truncate text-xs text-mm-muted">{user.email}</p>
+            </div>
           </div>
-          <div className="flex flex-col pt-2" onClick={() => setOpen(false)}>
+          <div className="flex flex-col py-1" onClick={() => setOpen(false)}>
             <Link role="menuitem" to="/profile" className={item}>
-              <FiUser aria-hidden="true" /> Profile
-            </Link>
-            <Link role="menuitem" to="/my-collection" className={item}>
-              <FiFilm aria-hidden="true" /> My collection
+              <FiUser aria-hidden="true" className="text-mm-muted" /> Account
             </Link>
             <Link role="menuitem" to="/my-watchlist" className={item}>
-              <FiHeart aria-hidden="true" /> Watchlist
+              <FiHeart aria-hidden="true" className="text-mm-muted" /> My List
             </Link>
-            <button role="menuitem" type="button" onClick={onLogout} className={`${item} text-mm-danger-ink`}>
-              <FiLogOut aria-hidden="true" /> Log out
-            </button>
+            <Link role="menuitem" to="/my-collection" className={item}>
+              <FiFilm aria-hidden="true" className="text-mm-muted" /> My Collection
+            </Link>
+            <Link role="menuitem" to="/add-movie" className={item}>
+              <FiPlus aria-hidden="true" className="text-mm-muted" /> Add a movie
+            </Link>
           </div>
+          <button
+            role="menuitem"
+            type="button"
+            onClick={onLogout}
+            className="flex w-full items-center justify-center gap-2 border-t border-white/15 px-4 py-3.5 text-sm text-mm-ink hover:underline"
+          >
+            <FiLogOut aria-hidden="true" /> Sign out of Movie Matrix
+          </button>
         </div>
       )}
     </div>
@@ -122,102 +210,62 @@ const UserMenu = ({ user, onLogout }) => {
 
 const Navbar = () => {
   const { user, logOut } = useContext(AuthContext);
-  const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
+  const [scrolled, setScrolled] = useState(false);
 
-  // Close the mobile menu whenever the page changes
-  useEffect(() => setMenuOpen(false), [pathname]);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
+  const links = NAV_LINKS.filter((l) => !l.auth || user);
   const handleLogout = () => logOut().catch((error) => console.error("Logout error:", error));
 
-  const links = (
-    <>
-      <NavLink to="/" end className={linkClass}>
-        Home
-      </NavLink>
-      <NavLink to="/movies" className={linkClass}>
-        Movies
-      </NavLink>
-      {user && (
-        <>
-          <NavLink to="/my-watchlist" className={linkClass}>
-            Watchlist
-          </NavLink>
-          <NavLink to="/my-collection" className={linkClass}>
-            My collection
-          </NavLink>
-        </>
-      )}
-    </>
-  );
+  // Only the home page has a hero to sit on; elsewhere the bar is always solid
+  const transparent = pathname === "/" && !scrolled;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-mm-border bg-mm-surface/95 backdrop-blur">
-      <nav aria-label="Main" className="mx-auto flex max-w-[1180px] items-center gap-7 px-6 py-3.5">
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+        transparent ? "bg-linear-to-b from-black/80 to-transparent" : "bg-mm-bg shadow-lg shadow-black/30"
+      }`}
+    >
+      <nav aria-label="Main" className="flex h-16 items-center gap-6 px-4 sm:px-8 lg:h-[68px] lg:px-14">
         <Logo />
 
-        <div className="hidden items-center gap-6 lg:flex">{links}</div>
+        <ul className="hidden items-center gap-5 lg:flex">
+          {links.map((l) => (
+            <li key={l.to}>
+              <NavLink
+                to={l.to}
+                end={l.end}
+                className={({ isActive }) =>
+                  `text-sm transition-colors ${isActive ? "font-bold text-mm-ink" : "text-mm-ink/75 hover:text-mm-muted"}`
+                }
+              >
+                {l.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+        <BrowseMenu links={links} />
 
-        <SearchForm className="ml-auto hidden w-full max-w-[300px] md:flex" />
-
-        <div className="hidden items-center gap-2.5 lg:flex">
+        <div className="ml-auto flex items-center gap-3 sm:gap-5">
+          <ExpandingSearch />
           {user ? (
-            <>
-              <Button variant="outline" to="/add-movie" icon={<FiPlus />}>
-                Add movie
-              </Button>
-              <UserMenu user={user} onLogout={handleLogout} />
-            </>
+            <ProfileMenu user={user} onLogout={handleLogout} />
           ) : (
-            <>
-              <Button variant="outline" to="/login">
-                Log in
-              </Button>
-              <Button to="/register">Sign up</Button>
-            </>
+            <Link
+              to="/login"
+              className="rounded-[4px] bg-mm-accent px-4 py-1.5 text-sm font-semibold text-mm-on-accent hover:bg-mm-accent-hover"
+            >
+              Sign in
+            </Link>
           )}
         </div>
-
-        <button
-          type="button"
-          onClick={() => setMenuOpen((v) => !v)}
-          aria-expanded={menuOpen}
-          aria-controls="mobile-menu"
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          className="ml-auto flex size-11 items-center justify-center rounded-card text-2xl text-mm-ink hover:bg-white/5 md:ml-0 lg:hidden"
-        >
-          {menuOpen ? <FiX aria-hidden="true" /> : <FiMenu aria-hidden="true" />}
-        </button>
       </nav>
-
-      {menuOpen && (
-        <div id="mobile-menu" className="border-t border-mm-border bg-mm-surface px-6 pt-4 pb-6 lg:hidden">
-          <SearchForm className="mb-5 md:hidden" onDone={() => setMenuOpen(false)} />
-          <div className="flex flex-col gap-4">{links}</div>
-          <div className="mt-6 flex flex-wrap gap-3 border-t border-mm-border pt-5">
-            {user ? (
-              <>
-                <Button variant="outline" to="/add-movie" icon={<FiPlus />}>
-                  Add movie
-                </Button>
-                <Button variant="outline" to="/profile" icon={<FiUser />}>
-                  Profile
-                </Button>
-                <Button variant="danger" onClick={handleLogout} icon={<FiLogOut />}>
-                  Log out
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" to="/login">
-                  Log in
-                </Button>
-                <Button to="/register">Sign up</Button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </header>
   );
 };
