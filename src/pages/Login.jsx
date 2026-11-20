@@ -86,7 +86,7 @@ const Login = () => {
           content="Login to your Movie Matrix account to access your movie collection and more."
         />
       </Helmet>
-      <div className="min-h-screen flex items-center justify-center bg-base-100 max-w-11/12 mx-auto px-4 py-12">
+      <div className="min-h-screen flex items-center justify-center bg-base-100 mx-auto px-4 py-12">
         <div className="w-full max-w-md">
           {/* Logo & Title */}
           <div className="text-center mb-8 animate-fadeIn">

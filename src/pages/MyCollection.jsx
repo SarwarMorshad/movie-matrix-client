@@ -70,7 +70,7 @@ const MyCollection = () => {
         <title>My Collection</title>
         <meta name="description" content="View and manage your personal movie collection on Movie Matrix." />
       </Helmet>
-      <div className="min-h-screen bg-base-100 max-w-11/12 mx-auto py-12">
+      <div className="min-h-screen bg-base-100 mx-auto py-12">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12 animate-fadeIn">

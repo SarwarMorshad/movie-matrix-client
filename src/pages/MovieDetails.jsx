@@ -69,7 +69,7 @@ const MovieDetails = () => {
           content={`Details and reviews for the movie ${movie.title} on Movie Matrix.`}
         />
       </Helmet>
-      <div className="min-h-screen bg-base-100 max-w-11/12 mx-auto">
+      <div className="min-h-screen bg-base-100 mx-auto">
         {/* Hero Section with Backdrop */}
         <div className="relative h-[60vh] md:h-[70vh] overflow-hidden">
           <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" />

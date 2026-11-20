@@ -10,7 +10,7 @@ const ErrorPage = () => {
         <title>Error - 404</title>
         <meta name="description" content="An error occurred on Movie Matrix." />
       </Helmet>
-      <div className="min-h-screen flex items-center justify-center bg-movie-dark max-w-11/12 mx-auto px-4">
+      <div className="min-h-screen flex items-center justify-center bg-movie-dark mx-auto px-4">
         <div className="text-center space-y-6 max-w-lg">
           {/* Icon */}
           <div className="flex justify-center">

@@ -52,7 +52,7 @@ const MyWatchlist = () => {
         <title>My Watchlist</title>
         <meta name="description" content="View and manage your watchlist on Movie Matrix." />
       </Helmet>
-      <div className="min-h-screen bg-base-100 py-12 max-w-11/12 mx-auto">
+      <div className="min-h-screen bg-base-100 py-12 mx-auto">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12 animate-fadeIn">
