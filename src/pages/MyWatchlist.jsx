@@ -1,18 +1,17 @@
 import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import LoadingSpinner from "../components/LoadingSpinner";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 import toast from "react-hot-toast";
 import { MdFavorite, MdDelete } from "react-icons/md";
 import { FiStar } from "react-icons/fi";
-import useAxiosSecure from "../hooks/useAxiosSecure";
+import * as api from "../api/api";
 import { Helmet } from "react-helmet-async";
 
 const MyWatchlist = () => {
   const { user } = useContext(AuthContext);
   const [watchlist, setWatchlist] = useState([]);
   const [loading, setLoading] = useState(true);
-  const axiosInstance = useAxiosSecure();
 
   useEffect(() => {
     if (user) {
@@ -23,8 +22,7 @@ const MyWatchlist = () => {
   const fetchWatchlist = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(`/watchlist/${user.email}`);
-      setWatchlist(response.data);
+      setWatchlist(await api.getWatchlist(user.email));
     } catch (error) {
       console.error("Error fetching watchlist:", error);
       toast.error("Failed to load watchlist");
@@ -35,7 +33,7 @@ const MyWatchlist = () => {
 
   const removeFromWatchlist = async (movieId) => {
     try {
-      await axiosInstance.delete(`/watchlist/${user.email}/${movieId}`);
+      await api.removeFromWatchlist(user.email, movieId);
       setWatchlist(watchlist.filter((movie) => movie._id !== movieId));
       toast.success("Removed from watchlist");
     } catch (error) {

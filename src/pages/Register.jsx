@@ -5,7 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock, FiUser, FiImage, FiEye, FiEyeOff } from "react-icons/fi";
 import { MdMovie } from "react-icons/md";
 import toast from "react-hot-toast";
-import useAxiosSecure from "../hooks/useAxiosSecure";
+import * as api from "../api/api";
 import { Helmet } from "react-helmet-async";
 
 const Register = () => {
@@ -14,7 +14,6 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
-  const axiosInstance = useAxiosSecure();
 
   const validatePassword = (password) => {
     const hasUpperCase = /[A-Z]/.test(password);
@@ -118,7 +117,7 @@ const Register = () => {
 
   const saveUserToDatabase = async (userData) => {
     try {
-      await axiosInstance.post("/users", userData);
+      await api.saveUser(userData);
     } catch (error) {
       console.error("Error saving user:", error);
       // Don't show error to user, as this is not critical

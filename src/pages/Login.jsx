@@ -5,7 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { MdMovie } from "react-icons/md";
 import toast from "react-hot-toast";
-import useAxiosSecure from "../hooks/useAxiosSecure";
+import * as api from "../api/api";
 import { Helmet } from "react-helmet-async";
 
 const Login = () => {
@@ -14,7 +14,6 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const axiosInstance = useAxiosSecure();
 
   const from = location.state?.from?.pathname || "/";
 
@@ -71,7 +70,7 @@ const Login = () => {
 
   const saveUserToDatabase = async (userData) => {
     try {
-      await axiosInstance.post("/users", userData);
+      await api.saveUser(userData);
     } catch (error) {
       console.error("Error saving user:", error);
       // Don't show error to user, as this is not critical

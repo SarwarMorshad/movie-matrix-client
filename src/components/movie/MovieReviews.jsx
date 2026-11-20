@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 import { FiStar, FiEdit2, FiTrash2, FiSend } from "react-icons/fi";
 import toast from "react-hot-toast";
-import useAxiosSecure from "../hooks/useAxiosSecure";
+import * as api from "../../api/api";
 
 const MovieReviews = ({ movieId }) => {
   const { user } = useContext(AuthContext);
@@ -16,7 +16,6 @@ const MovieReviews = ({ movieId }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingReview, setEditingReview] = useState(null);
   const [editHoverRating, setEditHoverRating] = useState(0);
-  const axiosInstance = useAxiosSecure();
 
   // Fetch reviews
   useEffect(() => {
@@ -25,8 +24,7 @@ const MovieReviews = ({ movieId }) => {
 
   const fetchReviews = async () => {
     try {
-      const response = await axiosInstance.get(`/reviews/${movieId}`);
-      setReviews(response.data);
+      setReviews(await api.getMovieReviews(movieId));
     } catch (error) {
       console.error("Error fetching reviews:", error);
       toast.error("Failed to load reviews");
@@ -57,11 +55,10 @@ const MovieReviews = ({ movieId }) => {
     setIsSubmitting(true);
 
     try {
-      await axiosInstance.post(`/reviews`, {
+      await api.addReview({
         movieId,
         rating: newReview.rating,
         comment: newReview.comment,
-        userEmail: user.email,
         userName: user.displayName || "Anonymous",
         userPhoto: user.photoURL || null,
       });
@@ -83,10 +80,9 @@ const MovieReviews = ({ movieId }) => {
     if (!user) return;
 
     try {
-      await axiosInstance.put(`/reviews/${reviewId}`, {
+      await api.updateReview(reviewId, {
         rating: editingReview.rating,
         comment: editingReview.comment,
-        userEmail: user.email,
       });
 
       toast.success("Review updated successfully!");
@@ -106,9 +102,7 @@ const MovieReviews = ({ movieId }) => {
     if (!confirm("Are you sure you want to delete this review?")) return;
 
     try {
-      await axiosInstance.delete(`/reviews/${reviewId}`, {
-        params: { email: user.email },
-      });
+      await api.deleteReview(reviewId);
 
       toast.success("Review deleted successfully!");
       fetchReviews();
