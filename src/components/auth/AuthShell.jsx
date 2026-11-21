@@ -5,10 +5,11 @@ import useAuthBackdrop from "../../hooks/useAuthBackdrop";
 /**
  * Split-screen frame for the log in / sign up / password pages: the form on
  * the left, a big trending backdrop on the right (hidden on small screens).
+ * `flipped` swaps the sides (picture left, form right).
  *
  * <AuthShell title="Sign In" subtitle="...">...form...</AuthShell>
  */
-const AuthShell = ({ title, subtitle, children }) => {
+const AuthShell = ({ title, subtitle, flipped = false, children }) => {
   const backdrop = useAuthBackdrop();
 
   return (
@@ -32,14 +33,17 @@ const AuthShell = ({ title, subtitle, children }) => {
       </div>
 
       {/* Picture side */}
-      <div aria-hidden="true" className="relative hidden overflow-hidden bg-mm-surface lg:block">
+      <div aria-hidden="true" className={`relative hidden overflow-hidden bg-mm-surface lg:block ${flipped ? "lg:order-first" : ""}`}>
         {backdrop && (
           <img src={backdrop.backdropUrl} alt="" className="absolute inset-0 size-full object-cover motion-safe:animate-fadeIn" />
         )}
-        <div className="absolute inset-y-0 left-0 w-40 bg-linear-to-r from-mm-bg to-transparent" />
+        {/* Fade the picture into the form side */}
+        <div
+          className={`absolute inset-y-0 w-40 from-mm-bg to-transparent ${flipped ? "right-0 bg-linear-to-l" : "left-0 bg-linear-to-r"}`}
+        />
         <div className="absolute inset-x-0 bottom-0 h-56 bg-linear-to-t from-black/85 to-transparent" />
         {backdrop && (
-          <div className="absolute right-10 bottom-10 left-16">
+          <div className={`absolute bottom-10 ${flipped ? "right-16 left-10" : "right-10 left-16"}`}>
             <p className="text-xs font-semibold tracking-[0.2em] text-mm-accent uppercase">Trending now</p>
             <p className="mt-1 font-display text-3xl font-extrabold text-white drop-shadow">{backdrop.title}</p>
           </div>

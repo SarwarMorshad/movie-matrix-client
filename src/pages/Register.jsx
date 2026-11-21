@@ -101,7 +101,7 @@ const Register = () => {
         <meta name="description" content="Create a free Movie Matrix account to keep a list, rate movies and share reviews." />
       </Helmet>
 
-      <AuthShell title="Sign Up" subtitle="Create a free account to keep your list, rate movies and share reviews.">
+      <AuthShell flipped title="Sign Up" subtitle="Create a free account to keep your list, rate movies and share reviews.">
         {error && (
           <p role="alert" className="mb-5 rounded-[4px] bg-mm-accent px-4 py-3 text-sm font-medium text-mm-on-accent">
             {error}{" "}
