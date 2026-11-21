@@ -1,9 +1,14 @@
 import { useId, useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
+// "Raised" = the field has focus or a value: the label sits on the border
+const RAISED = "peer-focus:[&>legend]:max-w-full peer-[:not(:placeholder-shown)]:[&>legend]:max-w-full";
+
 /**
- * Floating-label input for the auth forms. Password fields get a show/hide
- * toggle. Pass `error` to show a message under the field, or `hint` for help text.
+ * Outlined input for the auth forms. The label starts inside the box and moves
+ * up into a gap in the border once the field has focus or a value. Password
+ * fields get a show/hide toggle. Pass `error` to show a message under the
+ * field, or `hint` for help text. Required fields get an asterisk.
  *
  * <AuthField label="Email" name="email" type="email" autoComplete="email" required />
  */
@@ -12,6 +17,7 @@ const AuthField = ({ label, type = "text", error, hint, className = "", children
   const [visible, setVisible] = useState(false);
   const isPassword = type === "password";
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
+  const text = inputProps.required ? `${label} *` : label;
 
   return (
     <div className={className}>
@@ -22,16 +28,30 @@ const AuthField = ({ label, type = "text", error, hint, className = "", children
           placeholder=" "
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className={`peer h-14 w-full rounded-[4px] border bg-mm-field/40 px-4 pt-4 text-base text-mm-ink focus:outline-none ${
-            isPassword ? "pr-12" : ""
-          } ${error ? "border-mm-danger focus:border-mm-danger" : "border-white/30 focus:border-mm-ink"}`}
+          className={`peer h-14 w-full rounded-xl bg-transparent px-4 text-base text-mm-ink focus:outline-none ${isPassword ? "pr-12" : ""}`}
           {...inputProps}
         />
+        {/* The border. Its legend holds an invisible copy of the label, which
+            opens the gap in the top border when the label is raised. */}
+        <fieldset
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-x-0 -top-[5px] bottom-0 rounded-xl border px-3 transition-colors ${RAISED} ${
+            error
+              ? "border-mm-danger"
+              : "border-white/25 peer-hover:border-white/50 peer-focus:border-mm-accent peer-focus:peer-hover:border-mm-accent"
+          }`}
+        >
+          <legend className="invisible block h-[11px] max-w-[0.01px] text-xs whitespace-nowrap transition-[max-width] duration-100">
+            <span className="px-1">{text}</span>
+          </legend>
+        </fieldset>
         <label
           htmlFor={id}
-          className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-base text-mm-muted transition-all peer-focus:top-3.5 peer-focus:text-xs peer-[:not(:placeholder-shown)]:top-3.5 peer-[:not(:placeholder-shown)]:text-xs"
+          className={`pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-base transition-all peer-focus:top-0 peer-focus:text-xs peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs ${
+            error ? "text-mm-danger-ink" : "text-mm-muted peer-focus:text-mm-accent"
+          }`}
         >
-          {label}
+          {text}
         </label>
         {isPassword && (
           <button
