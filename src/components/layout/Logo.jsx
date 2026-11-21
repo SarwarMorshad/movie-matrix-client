@@ -8,7 +8,7 @@ const Logo = ({ size = "md" }) => {
       to="/"
       aria-label="Movie Matrix home"
       className={`flex shrink-0 items-center gap-2.5 font-display font-extrabold tracking-tight text-mm-ink ${
-        big ? "text-[22px]" : "text-lg"
+        big ? "text-lg sm:text-[22px]" : "text-lg"
       }`}
     >
       <span
