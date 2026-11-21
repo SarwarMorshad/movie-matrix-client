@@ -2,6 +2,7 @@ import { Link } from "react-router";
 
 const VARIANTS = {
   primary: "bg-mm-accent text-mm-on-accent hover:bg-mm-accent-hover",
+  light: "bg-mm-ink text-mm-bg hover:bg-mm-ink/80", // white "Play" button on dark heroes
   secondary: "bg-white/10 text-mm-ink border border-white/25 hover:bg-white/15",
   outline: "border border-mm-field text-mm-ink hover:border-mm-muted",
   dark: "bg-mm-footer text-mm-ink border border-mm-border hover:border-mm-field",
