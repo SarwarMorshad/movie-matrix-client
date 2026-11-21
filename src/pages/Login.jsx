@@ -1,212 +1,119 @@
 import { useContext, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router";
+import { Helmet } from "react-helmet-async";
+import toast from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext";
 import { isAccountActive } from "../config/auth";
-import { FcGoogle } from "react-icons/fc";
-import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
-import { MdMovie } from "react-icons/md";
-import toast from "react-hot-toast";
 import * as api from "../api/api";
-import { Helmet } from "react-helmet-async";
+import { authErrorMessage, isCancelledPopup } from "../utils/authErrors";
+import { AuthShell, AuthField, GoogleButton, SubmitButton } from "../components/auth";
+
+// Save the profile the first time someone signs in; failures aren't worth bothering them with
+const saveProfile = (user) =>
+  api.saveUser({ name: user.displayName, email: user.email, photoURL: user.photoURL }).catch(() => {});
 
 const Login = () => {
   const { signInUser, signInWithGoogle } = useContext(AuthContext);
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   const from = location.state?.from?.pathname || "/";
+  const params = new URLSearchParams(location.search);
   // The verification email's link brings people here with ?verified=1
-  const verifiedFromLink = new URLSearchParams(location.search).get("verified") === "1";
+  const verifiedFromLink = params.get("verified") === "1";
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
-
     const form = e.target;
-    const email = form.email.value;
-    const password = form.password.value;
+    setBusy(true);
+    setError("");
 
     try {
-      const result = await signInUser(email, password);
-
-      // Save user to database
-      await saveUserToDatabase({
-        name: result.user.displayName,
-        email: result.user.email,
-        photoURL: result.user.photoURL,
-      });
+      const { user } = await signInUser(form.email.value.trim(), form.password.value);
+      await saveProfile(user);
 
       // New accounts must verify their email before they can use the app
-      if (!isAccountActive(result.user)) {
+      if (!isAccountActive(user)) {
         toast("Please verify your email to finish signing in");
         navigate("/verify-email", { replace: true, state: { from: location.state?.from } });
         return;
       }
 
-      toast.success("Login successful! Welcome back to Movie Matrix");
+      toast.success("Welcome back!");
       navigate(from, { replace: true });
-    } catch (error) {
-      console.error("Login error:", error);
-      const wrongCredentials = ["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found"];
-      toast.error(
-        wrongCredentials.includes(error.code)
-          ? "Wrong email or password"
-          : error.code === "auth/too-many-requests"
-            ? "Too many attempts. Please wait a moment and try again."
-            : "Couldn't log in, please try again"
-      );
+    } catch (err) {
+      setError(authErrorMessage(err, "Couldn't sign in. Please try again."));
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-
+  const handleGoogle = async () => {
+    setBusy(true);
+    setError("");
     try {
-      const result = await signInWithGoogle();
-
-      // Save user to database
-      await saveUserToDatabase({
-        name: result.user.displayName,
-        email: result.user.email,
-        photoURL: result.user.photoURL,
-      });
-
-      toast.success("Login successful! Welcome to Movie Matrix");
+      const { user } = await signInWithGoogle();
+      await saveProfile(user);
+      toast.success("Welcome to Movie Matrix!");
       navigate(from, { replace: true });
-    } catch (error) {
-      console.error("Google login error:", error);
-      toast.error(error.message || "Could not sign in with Google");
+    } catch (err) {
+      if (!isCancelledPopup(err)) setError(authErrorMessage(err, "Couldn't sign in with Google."));
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveUserToDatabase = async (userData) => {
-    try {
-      await api.saveUser(userData);
-    } catch (error) {
-      console.error("Error saving user:", error);
-      // Don't show error to user, as this is not critical
+      setBusy(false);
     }
   };
 
   return (
     <>
       <Helmet>
-        <title>Login</title>
-        <meta
-          name="description"
-          content="Login to your Movie Matrix account to access your movie collection and more."
-        />
+        <title>Sign in · Movie Matrix</title>
+        <meta name="description" content="Sign in to Movie Matrix to see your list, reviews and collection." />
       </Helmet>
-      <div className="min-h-screen flex items-center justify-center bg-base-100 mx-auto px-4 py-12">
-        <div className="w-full max-w-md">
-          {/* Logo & Title */}
-          <div className="text-center mb-8 animate-fadeIn">
-            <div className="flex justify-center mb-4">
-              <MdMovie className="text-primary text-6xl" />
-            </div>
-            <h1 className="text-4xl font-bold text-white font-heading mb-2">Welcome Back</h1>
-            <p className="text-gray-400">Login to access your movie collection</p>
-          </div>
 
-          {/* Shown when arriving from the verification link */}
-          {verifiedFromLink && (
-            <p role="status" className="mb-4 rounded-lg border border-green-500/40 bg-green-500/10 px-4 py-3 text-center text-sm text-green-300">
-              Your email is verified. Log in to continue.
-            </p>
-          )}
+      <AuthShell title="Sign In">
+        {verifiedFromLink && (
+          <p role="status" className="mb-5 rounded-[4px] bg-green-500/15 px-4 py-3 text-sm text-green-300">
+            Your email is verified. Sign in to continue.
+          </p>
+        )}
+        {error && (
+          <p role="alert" className="mb-5 rounded-[4px] bg-mm-accent px-4 py-3 text-sm font-medium text-mm-on-accent">
+            {error}
+          </p>
+        )}
 
-          {/* Login Form */}
-          <div className="bg-base-200 rounded-2xl p-8 shadow-2xl animate-scaleIn">
-            <form onSubmit={handleLogin} className="space-y-6">
-              {/* Email Field */}
-              <div>
-                <label className="block text-white font-semibold mb-2">Email Address</label>
-                <div className="relative">
-                  <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    className="input-field pl-12"
-                    required
-                  />
-                </div>
-              </div>
+        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          <AuthField
+            label="Email address"
+            name="email"
+            type="email"
+            autoComplete="email"
+            defaultValue={params.get("email") || ""}
+            required
+          />
+          <AuthField label="Password" name="password" type="password" autoComplete="current-password" required />
+          <SubmitButton busy={busy} busyText="Signing in…">
+            Sign In
+          </SubmitButton>
+        </form>
 
-              {/* Password Field */}
-              <div>
-                <label className="block text-white font-semibold mb-2">Password</label>
-                <div className="relative">
-                  <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    placeholder="Enter your password"
-                    className="input-field pl-12 pr-12"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-                  >
-                    {showPassword ? <FiEyeOff className="text-xl" /> : <FiEye className="text-xl" />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Forgot Password */}
-              <div className="text-right">
-                <a href="#" className="text-sm text-primary hover:text-secondary transition-colors">
-                  Forgot Password?
-                </a>
-              </div>
-
-              {/* Login Button */}
-              <button type="submit" disabled={loading} className="btn-primary w-full">
-                {loading ? <span className="loading loading-spinner loading-sm"></span> : "Login"}
-              </button>
-            </form>
-
-            {/* Divider */}
-            <div className="divider text-gray-400 my-6">OR</div>
-
-            {/* Google Login */}
-            <button
-              onClick={handleGoogleLogin}
-              disabled={loading}
-              className="btn btn-outline w-full text-white hover:bg-white hover:text-black border-white"
-            >
-              <FcGoogle className="text-2xl" />
-              Continue with Google
-            </button>
-
-            {/* Register Link */}
-            <p className="text-center text-gray-400 mt-6">
-              Don't have an account?{" "}
-              <Link
-                to="/register"
-                className="text-primary hover:text-secondary font-semibold transition-colors"
-              >
-                Register Now
-              </Link>
-            </p>
-          </div>
-
-          {/* Back to Home */}
-          <div className="text-center mt-6">
-            <Link to="/" className="text-gray-400 hover:text-white transition-colors">
-              ← Back to Home
-            </Link>
-          </div>
+        <div className="mt-4 text-center">
+          <Link to="/forgot-password" className="text-sm text-mm-ink underline-offset-4 hover:underline">
+            Forgot password?
+          </Link>
         </div>
-      </div>
+
+        <GoogleButton onClick={handleGoogle} disabled={busy} />
+
+        <p className="mt-8 text-mm-muted">
+          New to Movie Matrix?{" "}
+          <Link to="/register" state={location.state} className="font-semibold text-mm-ink hover:underline">
+            Sign up now.
+          </Link>
+        </p>
+      </AuthShell>
     </>
   );
 };
