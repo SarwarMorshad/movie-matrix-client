@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock, FiUser, FiImage, FiEye, FiEyeOff } from "react-icons/fi";
@@ -10,6 +10,7 @@ import { Helmet } from "react-helmet-async";
 
 const Register = () => {
   const { createUser, updateUserProfile, signInWithGoogle, setUser } = useContext(AuthContext);
+  const [searchParams] = useSearchParams(); // ?email= from the landing page form
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
@@ -171,6 +172,7 @@ const Register = () => {
                     type="email"
                     name="email"
                     placeholder="Enter your email"
+                    defaultValue={searchParams.get("email") || ""}
                     className="input-field pl-12"
                     required
                   />

@@ -1,373 +1,292 @@
-import { useContext, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router";
+import { FiChevronDown, FiFilm, FiHeart, FiLogOut, FiPlus, FiSearch, FiUser, FiX } from "react-icons/fi";
 import { AuthContext } from "../../context/AuthContext";
-import { FiMenu, FiX, FiLogOut, FiHeart, FiUser } from "react-icons/fi";
-import { MdMovie, MdVideoLibrary } from "react-icons/md";
-import { HiSparkles } from "react-icons/hi";
-import ThemeToggle from "../common/ThemeToggle";
+import Logo from "./Logo";
+
+// Netflix-style top bar: transparent over the home hero, solid once you scroll,
+// small text links, an expanding search, and a square avatar menu.
+
+const NAV_LINKS = [
+  { to: "/", label: "Home", end: true },
+  { to: "/movies", label: "Movies" },
+  { to: "/my-watchlist", label: "My List", auth: true },
+  { to: "/my-collection", label: "My Collection", auth: true },
+];
+
+// Closes a popup on outside click or Escape
+const useDismiss = (open, setOpen, ref) => {
+  useEffect(() => {
+    if (!open) return;
+    const close = (e) => {
+      if (e.type === "keydown" ? e.key === "Escape" : !ref.current?.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", close);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", close);
+    };
+  }, [open, setOpen, ref]);
+};
+
+// Search icon that opens into a box; Enter goes to All Movies with ?search=
+const ExpandingSearch = () => {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
+
+  const submit = (e) => {
+    e.preventDefault();
+    const q = query.trim();
+    if (!q) return;
+    navigate(`/movies?search=${encodeURIComponent(q)}`);
+  };
+
+  const close = () => {
+    setQuery("");
+    setOpen(false);
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Search movies"
+        className="flex size-10 items-center justify-center text-xl text-mm-ink hover:text-mm-accent"
+      >
+        <FiSearch aria-hidden="true" />
+      </button>
+    );
+  }
+
+  return (
+    <form
+      role="search"
+      onSubmit={submit}
+      onKeyDown={(e) => e.key === "Escape" && close()}
+      onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && !query && close()}
+      className="flex h-10 w-[min(70vw,260px)] items-center gap-2 border border-white/80 bg-black/80 px-2.5 motion-safe:animate-[searchOpen_200ms_ease-out]"
+    >
+      <FiSearch aria-hidden="true" className="shrink-0 text-lg text-mm-ink" />
+      <label htmlFor="nav-search" className="sr-only">
+        Search movies
+      </label>
+      <input
+        id="nav-search"
+        ref={inputRef}
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Titles, genres, people"
+        className="min-w-0 flex-1 bg-transparent text-sm text-mm-ink placeholder:text-mm-muted focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+      />
+      <button
+        type="button"
+        onClick={close}
+        aria-label="Close search"
+        className="shrink-0 text-mm-muted hover:text-mm-ink"
+      >
+        <FiX aria-hidden="true" />
+      </button>
+    </form>
+  );
+};
+
+// "Browse" dropdown that replaces the links on small screens
+const BrowseMenu = ({ links }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useDismiss(open, setOpen, ref);
+
+  return (
+    <div ref={ref} className="relative lg:hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="flex h-10 items-center gap-1 text-sm font-semibold text-mm-ink"
+      >
+        Browse <FiChevronDown aria-hidden="true" className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute top-full left-1/2 z-50 mt-3 w-56 -translate-x-1/2 border-t-2 border-mm-ink bg-black/95 py-2"
+        >
+          {links.map((l) => (
+            <NavLink
+              key={l.to}
+              to={l.to}
+              end={l.end}
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `block py-3 text-center text-sm hover:bg-white/5 ${isActive ? "font-bold text-mm-ink" : "text-mm-muted"}`
+              }
+            >
+              {l.label}
+            </NavLink>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Square avatar + caret, opening the account menu
+const ProfileMenu = ({ user, onLogout }) => {
+  const [open, setOpen] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  const ref = useRef(null);
+  useDismiss(open, setOpen, ref);
+
+  const initial = (user.displayName || user.email || "?").charAt(0).toUpperCase();
+  const avatar = (size) => (
+    <span
+      className={`flex ${size} shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-mm-accent font-display font-extrabold text-mm-on-accent`}
+    >
+      {user.photoURL && !imageFailed ? (
+        <img
+          src={user.photoURL}
+          alt=""
+          referrerPolicy="no-referrer"
+          onError={() => setImageFailed(true)}
+          className="size-full object-cover"
+        />
+      ) : (
+        initial
+      )}
+    </span>
+  );
+  const item = "flex items-center gap-3 px-4 py-2.5 text-sm text-mm-ink hover:underline";
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Account menu"
+        className="flex items-center gap-2 text-mm-ink"
+      >
+        {avatar("size-8")}
+        <FiChevronDown aria-hidden="true" className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute top-full right-0 z-50 mt-4 w-60 border border-white/15 bg-black/95 shadow-2xl"
+        >
+          <div className="flex items-center gap-3 px-4 py-3">
+            {avatar("size-8")}
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-mm-ink">{user.displayName || "Member"}</p>
+              <p className="truncate text-xs text-mm-muted">{user.email}</p>
+            </div>
+          </div>
+          <div className="flex flex-col py-1" onClick={() => setOpen(false)}>
+            <Link role="menuitem" to="/profile" className={item}>
+              <FiUser aria-hidden="true" className="text-mm-muted" /> Account
+            </Link>
+            <Link role="menuitem" to="/my-watchlist" className={item}>
+              <FiHeart aria-hidden="true" className="text-mm-muted" /> My List
+            </Link>
+            <Link role="menuitem" to="/my-collection" className={item}>
+              <FiFilm aria-hidden="true" className="text-mm-muted" /> My Collection
+            </Link>
+            <Link role="menuitem" to="/add-movie" className={item}>
+              <FiPlus aria-hidden="true" className="text-mm-muted" /> Add a movie
+            </Link>
+          </div>
+          <button
+            role="menuitem"
+            type="button"
+            onClick={onLogout}
+            className="flex w-full items-center justify-center gap-2 border-t border-white/15 px-4 py-3.5 text-sm text-mm-ink hover:underline"
+          >
+            <FiLogOut aria-hidden="true" /> Sign out of Movie Matrix
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Navbar = () => {
   const { user, logOut } = useContext(AuthContext);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const { pathname } = useLocation();
+  const [scrolled, setScrolled] = useState(false);
 
-  const handleLogout = () => {
-    logOut()
-      .then(() => {
-        // Success handled by auth state change
-      })
-      .catch((error) => {
-        console.error("Logout error:", error);
-      });
-  };
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-  // Default avatar fallback
-  const defaultAvatar = "https://i.ibb.co/2FbxWkt/user.png";
-  const userAvatar = imageError ? defaultAvatar : user?.photoURL || defaultAvatar;
+  const links = NAV_LINKS.filter((l) => !l.auth || user);
+  const handleLogout = () => logOut().catch((error) => console.error("Logout error:", error));
 
-  const navLinks = (
-    <>
-      <li>
-        <NavLink
-          to="/"
-          className={({ isActive }) =>
-            isActive ? "text-primary font-semibold" : "text-white hover:text-primary transition-colors"
-          }
-        >
-          Home
-        </NavLink>
-      </li>
-      <li>
-        <NavLink
-          to="/movies"
-          className={({ isActive }) =>
-            isActive ? "text-primary font-semibold" : "text-white hover:text-primary transition-colors"
-          }
-        >
-          All Movies
-        </NavLink>
-      </li>
-      {user && (
-        <>
-          <li>
-            <NavLink
-              to="/add-movie"
-              className={({ isActive }) =>
-                isActive ? "text-primary font-semibold" : "text-white hover:text-primary transition-colors"
-              }
-            >
-              Add Movie
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/my-collection"
-              className={({ isActive }) =>
-                isActive ? "text-primary font-semibold" : "text-white hover:text-primary transition-colors"
-              }
-            >
-              My Collection
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/my-watchlist"
-              className={({ isActive }) =>
-                isActive ? "text-primary font-semibold" : "text-white hover:text-primary transition-colors"
-              }
-            >
-              Watchlist
-            </NavLink>
-          </li>
-        </>
-      )}
-    </>
-  );
+  // Only the home page has a hero to sit on; elsewhere the bar is always solid
+  const transparent = pathname === "/" && !scrolled;
+  // Logged-out landing page: just the logo and Sign in, like a streaming sign-up page
+  const minimal = pathname === "/" && !user;
 
   return (
-    <nav className="bg-movie-dark/95 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 text-2xl font-bold font-heading group">
-            <MdMovie className="text-primary text-3xl group-hover:rotate-12 transition-transform duration-300" />
-            <span className="text-white">
-              Movie <span className="text-primary">Matrix</span>
-            </span>
-          </Link>
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+        transparent ? "bg-linear-to-b from-black/80 to-transparent" : "bg-mm-bg shadow-lg shadow-black/30"
+      }`}
+    >
+      <nav aria-label="Main" className="flex h-16 items-center gap-6 px-4 sm:px-8 lg:h-[68px] lg:px-14">
+        <Logo />
 
-          {/* Desktop Navigation */}
-          <ul className="hidden md:flex items-center space-x-8 text-base font-medium">{navLinks}</ul>
-
-          {/* Auth Section */}
-          <div className="hidden md:flex items-center space-x-4">
-            {/* Theme Toggle */}
-            <ThemeToggle />
-
-            {user ? (
-              <div className="dropdown dropdown-end">
-                {/* Avatar Button */}
-                <div
-                  tabIndex={0}
-                  role="button"
-                  className="btn btn-ghost btn-circle avatar hover:scale-110 transition-transform duration-300"
-                >
-                  <div className="w-11 rounded-full ring-2 ring-primary ring-offset-base-100 ring-offset-2 hover:ring-secondary transition-all duration-300">
-                    <img
-                      src={userAvatar}
-                      alt={user.displayName || "User"}
-                      onError={() => setImageError(true)}
-                      referrerPolicy="no-referrer"
-                      className="hover:brightness-110 transition-all duration-300"
-                    />
-                  </div>
-                  {/* Online Status Dot */}
-                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-base-100 rounded-full animate-pulse"></span>
-                </div>
-
-                {/* Dropdown Menu - BEAUTIFUL TAILWIND DESIGN */}
-                <ul
-                  tabIndex={0}
-                  className="menu dropdown-content mt-4 z-1 w-80 bg-linear-to-br from-base-200 to-base-300 rounded-2xl shadow-2xl border border-white/10 p-0 overflow-hidden animate-fade-in-down"
-                >
-                  {/* User Info Header with Gradient */}
-                  <li className="menu-title p-0 m-0">
-                    <div className="bg-linear-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-4 rounded-t-2xl">
-                      <div className="flex items-center gap-3">
-                        {/* Large Avatar */}
-                        <div className="avatar">
-                          <div className="w-16 rounded-full ring-2 ring-primary shadow-lg hover:scale-110 transition-transform duration-300">
-                            <img
-                              src={userAvatar}
-                              alt={user.displayName || "User"}
-                              referrerPolicy="no-referrer"
-                            />
-                          </div>
-                        </div>
-                        {/* User Details */}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-white font-bold text-lg">{user.displayName || "User"}</span>
-                            <HiSparkles className="text-yellow-400 text-lg animate-bounce" />
-                          </div>
-                          <span className="text-gray-400 text-sm">{user.email}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-
-                  {/* Divider */}
-                  <div className="h-px bg-linear-to-r from-transparent via-white/20 to-transparent my-2"></div>
-
-                  {/* Navigation Section */}
-                  <div className="px-3 py-2">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 mb-2">
-                      Navigation
-                    </p>
-
-                    {/* Profile */}
-                    <li className="mb-1">
-                      <Link
-                        to="/profile"
-                        className="group relative bg-linear-to-r from-blue-500/10 to-blue-500/5 hover:from-blue-500/20 hover:to-blue-500/10 rounded-xl px-4 py-3 text-white hover:text-blue-400 transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-blue-500/20"
-                      >
-                        <div className="flex items-center gap-4">
-                          {/* Icon Badge */}
-                          <div className="w-11 h-11 rounded-xl bg-blue-500/20 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-md">
-                            <FiUser className="text-2xl text-blue-400" />
-                          </div>
-                          {/* Text */}
-                          <div className="flex-1">
-                            <p className="font-bold text-base">My Profile</p>
-                            <p className="text-xs text-gray-400">View your info</p>
-                          </div>
-                        </div>
-                        {/* Shine Effect */}
-                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
-                      </Link>
-                    </li>
-
-                    {/* My Collection */}
-                    <li className="mb-1">
-                      <Link
-                        to="/my-collection"
-                        className="group relative bg-linear-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 rounded-xl px-4 py-3 text-white hover:text-primary transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-primary/20"
-                      >
-                        <div className="flex items-center gap-4">
-                          {/* Icon Badge */}
-                          <div className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-md">
-                            <MdVideoLibrary className="text-2xl text-primary" />
-                          </div>
-                          {/* Text */}
-                          <div className="flex-1">
-                            <p className="font-bold text-base">My Collection</p>
-                            <p className="text-xs text-gray-400">View your movies</p>
-                          </div>
-                        </div>
-                        {/* Shine Effect */}
-                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
-                      </Link>
-                    </li>
-
-                    {/* My Watchlist */}
-                    <li className="mb-1">
-                      <Link
-                        to="/my-watchlist"
-                        className="group relative bg-linear-to-r from-secondary/10 to-secondary/5 hover:from-secondary/20 hover:to-secondary/10 rounded-xl px-4 py-3 text-white hover:text-secondary transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-secondary/20"
-                      >
-                        <div className="flex items-center gap-4">
-                          {/* Icon Badge */}
-                          <div className="w-11 h-11 rounded-xl bg-secondary/20 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-md">
-                            <FiHeart className="text-2xl text-secondary" />
-                          </div>
-                          {/* Text */}
-                          <div className="flex-1">
-                            <p className="font-bold text-base">My Watchlist</p>
-                            <p className="text-xs text-gray-400">Saved for later</p>
-                          </div>
-                        </div>
-                        {/* Shine Effect */}
-                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
-                      </Link>
-                    </li>
-                  </div>
-
-                  {/* Divider with More Space */}
-                  <div className="h-px bg-linear-to-r from-transparent via-white/20 to-transparent my-3"></div>
-
-                  {/* Account Section */}
-                  <div className="px-3 pb-3">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 mb-2">
-                      Account
-                    </p>
-
-                    {/* Logout */}
-                    <li>
-                      <button
-                        onClick={handleLogout}
-                        className="group relative bg-linear-to-r from-error/10 to-error/5 hover:from-error/20 hover:to-error/10 rounded-xl px-4 py-3 text-white hover:text-error transition-all duration-300 hover:translate-x-2 hover:shadow-lg hover:shadow-error/20 w-full"
-                      >
-                        <div className="flex items-center gap-4">
-                          {/* Icon Badge */}
-                          <div className="w-11 h-11 rounded-xl bg-error/20 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-md">
-                            <FiLogOut className="text-2xl text-error" />
-                          </div>
-                          {/* Text */}
-                          <div className="flex-1 text-left">
-                            <p className="font-bold text-base">Logout</p>
-                            <p className="text-xs text-gray-400">See you soon!</p>
-                          </div>
-                        </div>
-                        {/* Shine Effect */}
-                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
-                      </button>
-                    </li>
-                  </div>
-                </ul>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-3">
-                <Link to="/login">
-                  <button className="btn btn-outline text-white w-full hover:scale-105 transition-all duration-300">
-                    Login
-                  </button>
-                </Link>
-                <Link to="/register">
-                  <button className="btn btn-primary hover:bg-movie-accent-hover text-white border-none hover:scale-105 transition-all duration-300">
-                    Register
-                  </button>
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-3">
-            {/* Theme Toggle */}
-            <ThemeToggle />
-
-            {user && (
-              <div className="avatar">
-                <div className="w-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1 hover:scale-110 transition-transform duration-300">
-                  <img
-                    src={userAvatar}
-                    alt={user.displayName || "User"}
-                    onError={() => setImageError(true)}
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-              </div>
-            )}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-white text-2xl hover:scale-110 transition-transform duration-300"
-            >
-              {isMenuOpen ? <FiX /> : <FiMenu />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden pb-4 animate-fade-in">
-            <ul className="space-y-3 text-base font-medium">{navLinks}</ul>
-
-            {/* Mobile Auth Section */}
-            <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
-              {user ? (
-                <>
-                  <div className="bg-linear-to-r from-primary/20 to-secondary/20 rounded-xl p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="avatar">
-                        <div className="w-12 rounded-full ring-2 ring-primary">
-                          <img src={userAvatar} alt={user.displayName || "User"} />
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-white font-semibold flex items-center gap-2">
-                          {user.displayName || "User"}
-                          <HiSparkles className="text-yellow-400 animate-pulse" />
-                        </p>
-                        <p className="text-gray-400 text-sm">{user.email}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Profile Button - Mobile */}
-                  <Link to="/profile" className="w-full block">
-                    <button className="btn bg-blue-500 hover:bg-blue-600 text-white w-full border-none">
-                      <FiUser className="text-lg" />
-                      View Profile
-                    </button>
-                  </Link>
-
-                  <button
-                    onClick={handleLogout}
-                    className="btn bg-error hover:bg-red-600 text-white w-full border-none hover:scale-105 transition-transform duration-300"
+        {!minimal && (
+          <>
+            <ul className="hidden items-center gap-5 lg:flex">
+              {links.map((l) => (
+                <li key={l.to}>
+                  <NavLink
+                    to={l.to}
+                    end={l.end}
+                    className={({ isActive }) =>
+                      `text-sm transition-colors ${isActive ? "font-bold text-mm-ink" : "text-mm-ink/75 hover:text-mm-muted"}`
+                    }
                   >
-                    <FiLogOut className="text-lg" />
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <div className="flex flex-col space-y-2">
-                  <Link to="/login" className="w-full">
-                    <button className="btn btn-outline text-white w-full hover:scale-105 transition-all duration-300">
-                      Login
-                    </button>
-                  </Link>
-                  <Link to="/register" className="w-full">
-                    <button className="btn btn-primary hover:bg-movie-accent-hover text-white w-full border-none hover:scale-105 transition-all duration-300">
-                      Register
-                    </button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
+                    {l.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+            <BrowseMenu links={links} />
+          </>
         )}
-      </div>
-    </nav>
+
+        <div className="ml-auto flex items-center gap-3 sm:gap-5">
+          {!minimal && <ExpandingSearch />}
+          {user ? (
+            <ProfileMenu user={user} onLogout={handleLogout} />
+          ) : (
+            <Link
+              to="/login"
+              className="rounded-[4px] bg-mm-accent px-4 py-1.5 text-sm font-semibold text-mm-on-accent hover:bg-mm-accent-hover"
+            >
+              Sign in
+            </Link>
+          )}
+        </div>
+      </nav>
+    </header>
   );
 };
 
