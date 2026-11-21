@@ -250,7 +250,7 @@ const Navbar = () => {
         transparent ? "bg-linear-to-b from-black/80 to-transparent" : "bg-mm-bg shadow-lg shadow-black/30"
       }`}
     >
-      <nav aria-label="Main" className="flex h-16 items-center gap-6 px-4 sm:px-8 lg:h-[68px] lg:px-14">
+      <nav aria-label="Main" className="flex h-16 items-center gap-3 px-4 sm:gap-6 sm:px-8 lg:h-[68px] lg:px-14">
         <Logo />
 
         {!minimal && (

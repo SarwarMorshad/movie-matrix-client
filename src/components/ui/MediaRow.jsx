@@ -23,9 +23,10 @@ const MediaRow = ({ id, title, items, renderItem, getKey = (item) => item.id ?? 
         <button type="button" onClick={() => scroll(-1)} aria-label={`Scroll ${title} left`} className={`${arrow} left-2`}>
           <FiChevronLeft aria-hidden="true" />
         </button>
+        {/* [contain:paint] stops the cards from widening the page on phones */}
         <ul
           ref={rowRef}
-          className="flex snap-x gap-3 overflow-x-auto scroll-smooth px-4 pb-2 sm:px-8 lg:px-14 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex snap-x gap-3 overflow-x-auto scroll-smooth px-4 pb-2 [contain:paint] sm:px-8 lg:px-14 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item) => (
             <li key={getKey(item)} className="w-[140px] shrink-0 snap-start sm:w-[160px] lg:w-[180px]">
