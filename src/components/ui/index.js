@@ -5,3 +5,4 @@ export { default as PosterCard } from "./PosterCard";
 export { default as SectionHeader } from "./SectionHeader";
 export { default as Pagination } from "./Pagination";
 export { default as MediaRow } from "./MediaRow";
+export { default as TrailerModal } from "./TrailerModal";
