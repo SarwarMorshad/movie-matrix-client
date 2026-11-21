@@ -7,6 +7,7 @@ import { Button, MediaRow, Spinner, TrailerModal } from "../components/ui";
 import SeriesCard from "../components/tv/SeriesCard";
 import SeasonEpisodes from "../components/tv/SeasonEpisodes";
 import CastRow from "../components/tv/CastRow";
+import MyListButton from "../components/common/MyListButton";
 import { formatRating, formatRuntime } from "../utils/format";
 
 const Fact = ({ label, children }) =>
@@ -112,14 +113,13 @@ const SeriesDetails = () => {
 
           {series.overview && <p className="max-w-2xl text-base leading-relaxed text-mm-ink/90 md:text-lg">{series.overview}</p>}
 
-          <div className="flex flex-wrap gap-3 pt-1">
-            {series.trailerKey ? (
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            {series.trailerKey && (
               <Button size="lg" variant="light" onClick={() => setTrailerOpen(true)} icon={<FaPlay className="text-xs" />}>
                 Play trailer
               </Button>
-            ) : (
-              <p className="text-sm text-mm-muted">No trailer available</p>
             )}
+            <MyListButton type="series" id={series.id} />
           </div>
         </div>
       </section>
