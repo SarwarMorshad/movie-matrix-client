@@ -118,7 +118,7 @@ const Login = () => {
 
         <p className="mt-8 text-mm-muted">
           New to Movie Matrix?{" "}
-          <Link to="/register" state={location.state} className="font-semibold text-mm-ink hover:underline">
+          <Link to="/register" state={location.state} viewTransition className="font-semibold text-mm-ink hover:underline">
             Sign up now.
           </Link>
         </p>

@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Link } from "react-router";
 import Logo from "../layout/Logo";
 import useAuthBackdrop from "../../hooks/useAuthBackdrop";
@@ -11,11 +12,16 @@ import useAuthBackdrop from "../../hooks/useAuthBackdrop";
  */
 const AuthShell = ({ title, subtitle, flipped = false, children }) => {
   const backdrop = useAuthBackdrop();
+  // Fade the picture in only when it first loads, not when it's already on screen
+  // and just sliding across between Sign in and Sign up
+  const fadeIn = useRef(!backdrop).current;
 
   return (
     <div className="grid min-h-screen flex-1 lg:grid-cols-2">
       {/* Form side */}
-      <div className="flex flex-col px-6 py-6 sm:px-10 lg:px-14">
+      {/* The two panels carry view-transition names, so switching between Sign in
+          and Sign up (links with viewTransition) slides them past each other */}
+      <div className="flex flex-col px-6 py-6 [view-transition-name:auth-form] sm:px-10 lg:px-14">
         <Logo />
         <main className="flex flex-1 items-center justify-center py-12">
           <div className="w-full max-w-[380px]">
@@ -33,9 +39,11 @@ const AuthShell = ({ title, subtitle, flipped = false, children }) => {
       </div>
 
       {/* Picture side */}
-      <div aria-hidden="true" className={`relative hidden overflow-hidden bg-mm-surface lg:block ${flipped ? "lg:order-first" : ""}`}>
+      <div aria-hidden="true" className={`relative hidden overflow-hidden bg-mm-surface [view-transition-name:auth-picture] lg:block ${
+          flipped ? "lg:order-first" : ""
+        }`}>
         {backdrop && (
-          <img src={backdrop.backdropUrl} alt="" className="absolute inset-0 size-full object-cover motion-safe:animate-fadeIn" />
+          <img src={backdrop.backdropUrl} alt="" className={`absolute inset-0 size-full object-cover ${fadeIn ? "motion-safe:animate-fadeIn" : ""}`} />
         )}
         {/* Fade the picture into the form side */}
         <div

@@ -161,7 +161,7 @@ const Register = () => {
 
         <p className="mt-8 text-mm-muted">
           Already have an account?{" "}
-          <Link to="/login" state={location.state} className="font-semibold text-mm-ink hover:underline">
+          <Link to="/login" state={location.state} viewTransition className="font-semibold text-mm-ink hover:underline">
             Sign in.
           </Link>
         </p>
