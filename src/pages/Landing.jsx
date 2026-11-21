@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import * as api from "../api/api";
+import usePosterUrls from "../hooks/usePosterUrls";
 import LandingHero from "../components/landing/LandingHero";
 import PlansBanner from "../components/landing/PlansBanner";
 import TrendingRow from "../components/landing/TrendingRow";
@@ -9,14 +10,10 @@ import Faq from "../components/landing/Faq";
 
 // Home page for visitors who aren't signed in
 const Landing = () => {
-  const [posters, setPosters] = useState([]);
+  const posters = usePosterUrls();
   const [trending, setTrending] = useState([]);
 
   useEffect(() => {
-    api
-      .getMovies()
-      .then((movies) => setPosters(movies.map((m) => m.posterUrl).filter(Boolean)))
-      .catch(() => {});
     api.getTopRatedMovies(10).then(setTrending).catch(() => {});
   }, []);
 
