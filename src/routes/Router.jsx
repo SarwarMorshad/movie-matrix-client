@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import VerifyEmail from "../pages/VerifyEmail";
 import AllMovies from "../pages/AllMovies";
 import TvShows from "../pages/TvShows";
 import SeriesDetails from "../pages/SeriesDetails";
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
       {
         path: "/register",
         element: <Register />,
+      },
+      {
+        path: "/verify-email",
+        element: <VerifyEmail />,
       },
       {
         path: "/movies",
