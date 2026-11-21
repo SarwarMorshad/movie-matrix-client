@@ -18,6 +18,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [remember, setRemember] = useState(true);
 
   const from = location.state?.from?.pathname || "/";
   const params = new URLSearchParams(location.search);
@@ -31,7 +32,7 @@ const Login = () => {
     setError("");
 
     try {
-      const { user } = await signInUser(form.email.value.trim(), form.password.value);
+      const { user } = await signInUser(form.email.value.trim(), form.password.value, remember);
       await saveProfile(user);
 
       // New accounts must verify their email before they can use the app
@@ -54,7 +55,7 @@ const Login = () => {
     setBusy(true);
     setError("");
     try {
-      const { user } = await signInWithGoogle();
+      const { user } = await signInWithGoogle(remember);
       await saveProfile(user);
       toast.success("Welcome to Movie Matrix!");
       navigate(from, { replace: true });
@@ -94,16 +95,24 @@ const Login = () => {
             required
           />
           <AuthField label="Password" name="password" type="password" autoComplete="current-password" required />
+          <div className="flex items-center justify-between gap-4 text-sm">
+            <label className="flex cursor-pointer items-center gap-2 text-mm-muted">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="checkbox checkbox-sm rounded-[3px] border-white/40 checked:border-mm-accent checked:bg-mm-accent checked:text-mm-on-accent"
+              />
+              Remember me
+            </label>
+            <Link to="/forgot-password" className="text-mm-ink underline underline-offset-4 hover:text-mm-accent">
+              Forgot password?
+            </Link>
+          </div>
           <SubmitButton busy={busy} busyText="Signing in…">
             Sign In
           </SubmitButton>
         </form>
-
-        <div className="mt-4 text-center">
-          <Link to="/forgot-password" className="text-sm text-mm-ink underline-offset-4 hover:underline">
-            Forgot password?
-          </Link>
-        </div>
 
         <GoogleButton onClick={handleGoogle} disabled={busy} />
 
