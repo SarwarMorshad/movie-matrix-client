@@ -3,12 +3,14 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router";
 import { FiChevronDown, FiFilm, FiHeart, FiLogOut, FiPlus, FiSearch, FiUser, FiX } from "react-icons/fi";
 import { AuthContext } from "../../context/AuthContext";
 import Logo from "./Logo";
+import { hasHero } from "../../utils/heroPages";
 
 // Netflix-style top bar: transparent over the home hero, solid once you scroll,
 // small text links, an expanding search, and a square avatar menu.
 
 const NAV_LINKS = [
   { to: "/", label: "Home", end: true },
+  { to: "/tv", label: "TV Shows" },
   { to: "/movies", label: "Movies" },
   { to: "/my-watchlist", label: "My List", auth: true },
   { to: "/my-collection", label: "My Collection", auth: true },
@@ -238,7 +240,7 @@ const Navbar = () => {
   const handleLogout = () => logOut().catch((error) => console.error("Logout error:", error));
 
   // Only the home page has a hero to sit on; elsewhere the bar is always solid
-  const transparent = pathname === "/" && !scrolled;
+  const transparent = hasHero(pathname) && !scrolled;
   // Logged-out landing page: just the logo and Sign in, like a streaming sign-up page
   const minimal = pathname === "/" && !user;
 
