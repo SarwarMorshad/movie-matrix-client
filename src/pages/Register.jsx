@@ -1,269 +1,174 @@
 import { useContext, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
-import { FcGoogle } from "react-icons/fc";
-import { FiMail, FiLock, FiUser, FiImage, FiEye, FiEyeOff } from "react-icons/fi";
-import { MdMovie } from "react-icons/md";
-import toast from "react-hot-toast";
-import * as api from "../api/api";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import { Helmet } from "react-helmet-async";
+import toast from "react-hot-toast";
+import { AuthContext } from "../context/AuthContext";
+import * as api from "../api/api";
+import { passwordMeetsRules } from "../utils/password";
+import { authErrorMessage, isCancelledPopup } from "../utils/authErrors";
+import { AuthShell, AuthField, GoogleButton, SubmitButton, PasswordChecklist } from "../components/auth";
+
+const MAX_NAME_LENGTH = 60; // same limit as the server
+
+const isHttpUrl = (text) => {
+  try {
+    return ["http:", "https:"].includes(new URL(text).protocol);
+  } catch {
+    return false;
+  }
+};
+
+// Check the form before talking to Firebase; returns { field: message } for anything wrong
+const validate = ({ name, email, photoURL, password }) => {
+  const errors = {};
+  if (!name) errors.name = "Please enter your name.";
+  else if (name.length > MAX_NAME_LENGTH) errors.name = `Keep your name under ${MAX_NAME_LENGTH} characters.`;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Please enter a valid email address.";
+  if (photoURL && !isHttpUrl(photoURL)) errors.photoURL = "Use a link that starts with http:// or https://";
+  if (!passwordMeetsRules(password)) errors.password = "Your password doesn't meet all the rules below yet.";
+  return errors;
+};
 
 const Register = () => {
   const { createUser, updateUserProfile, signInWithGoogle, sendVerificationEmail } = useContext(AuthContext);
   const [searchParams] = useSearchParams(); // ?email= from the landing page form
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [passwordError, setPasswordError] = useState("");
+  const location = useLocation();
   const navigate = useNavigate();
 
-  const validatePassword = (password) => {
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const isLongEnough = password.length >= 6;
-
-    if (!hasUpperCase) {
-      return "Password must contain at least one uppercase letter";
-    }
-    if (!hasLowerCase) {
-      return "Password must contain at least one lowercase letter";
-    }
-    if (!isLongEnough) {
-      return "Password must be at least 6 characters long";
-    }
-    return "";
-  };
+  const [password, setPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setPasswordError("");
-
     const form = e.target;
-    const name = form.name.value;
-    const email = form.email.value;
-    const photoURL = form.photoURL.value;
-    const password = form.password.value;
+    const values = {
+      name: form.name.value.trim(),
+      email: form.email.value.trim(),
+      photoURL: form.photoURL.value.trim(),
+      password,
+    };
 
-    // Validate password
-    const error = validatePassword(password);
-    if (error) {
-      setPasswordError(error);
-      setLoading(false);
-      return;
-    }
+    const errors = validate(values);
+    setFieldErrors(errors);
+    setError("");
+    if (Object.keys(errors).length) return;
 
+    setBusy(true);
     try {
-      await createUser(email, password);
-      await updateUserProfile(name, photoURL);
+      await createUser(values.email, values.password);
+      await updateUserProfile(values.name, values.photoURL || null);
 
       // Prove the email is real: the account stays inactive until the link is clicked
       let linkSent = true;
       try {
         await sendVerificationEmail();
-      } catch (sendError) {
-        console.error("Couldn't send verification email:", sendError);
+      } catch {
         linkSent = false; // they can resend from the next page
       }
 
       // Save the profile (the server allows this before verification)
-      await saveUserToDatabase({ name, email, photoURL });
+      await api.saveUser({ name: values.name, email: values.email, photoURL: values.photoURL }).catch(() => {});
 
-      toast.success(linkSent ? "Account created! Check your email to verify it." : "Account created! Send yourself a verification email.");
-      navigate("/verify-email", { replace: true, state: { justSent: linkSent } });
-    } catch (error) {
-      console.error("Registration error:", error);
-
-      let errorMessage = "Registration failed. Please try again.";
-      if (error.code === "auth/email-already-in-use") {
-        errorMessage = "This email is already registered";
-      } else if (error.code === "auth/invalid-email") {
-        errorMessage = "Invalid email address";
-      } else if (error.code === "auth/weak-password") {
-        errorMessage = "Password is too weak";
-      }
-
-      toast.error(errorMessage);
+      navigate("/verify-email", { replace: true, state: { justSent: linkSent, from: location.state?.from } });
+    } catch (err) {
+      setError(authErrorMessage(err, "Couldn't create your account. Please try again."));
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   };
 
-  const handleGoogleRegister = async () => {
-    setLoading(true);
-
+  const handleGoogle = async () => {
+    setBusy(true);
+    setError("");
     try {
-      const result = await signInWithGoogle();
-
-      // Save user to database
-      await saveUserToDatabase({
-        name: result.user.displayName,
-        email: result.user.email,
-        photoURL: result.user.photoURL,
-      });
-
-      toast.success("Registration successful! Welcome to Movie Matrix");
-      navigate("/");
-    } catch (error) {
-      console.error("Google registration error:", error);
-      toast.error(error.message || "Could not register with Google");
+      const { user } = await signInWithGoogle();
+      await api.saveUser({ name: user.displayName, email: user.email, photoURL: user.photoURL }).catch(() => {});
+      toast.success("Welcome to Movie Matrix!");
+      navigate(location.state?.from?.pathname || "/", { replace: true });
+    } catch (err) {
+      if (!isCancelledPopup(err)) setError(authErrorMessage(err, "Couldn't sign up with Google."));
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveUserToDatabase = async (userData) => {
-    try {
-      await api.saveUser(userData);
-    } catch (error) {
-      console.error("Error saving user:", error);
-      // Don't show error to user, as this is not critical
+      setBusy(false);
     }
   };
 
   return (
     <>
       <Helmet>
-        <title>Register</title>
-        <meta
-          name="description"
-          content="Create a new account on Movie Matrix to start exploring and managing your movie collection."
-        />
+        <title>Sign up · Movie Matrix</title>
+        <meta name="description" content="Create a free Movie Matrix account to keep a list, rate movies and share reviews." />
       </Helmet>
-      <div className="min-h-screen flex items-center justify-center bg-base-100 mx-auto px-4 py-12">
-        <div className="w-full max-w-md">
-          {/* Logo & Title */}
-          <div className="text-center mb-8 animate-fadeIn">
-            <div className="flex justify-center mb-4">
-              <MdMovie className="text-primary text-6xl" />
-            </div>
-            <h1 className="text-4xl font-bold text-white font-heading mb-2">Join Movie Matrix</h1>
-            <p className="text-gray-400">Create an account to start your movie journey</p>
-          </div>
 
-          {/* Register Form */}
-          <div className="bg-base-200 rounded-2xl p-8 shadow-2xl animate-scaleIn">
-            <form onSubmit={handleRegister} className="space-y-5">
-              {/* Name Field */}
-              <div>
-                <label className="block text-white font-semibold mb-2">Full Name</label>
-                <div className="relative">
-                  <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Enter your full name"
-                    className="input-field pl-12"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Email Field */}
-              <div>
-                <label className="block text-white font-semibold mb-2">Email Address</label>
-                <div className="relative">
-                  <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    defaultValue={searchParams.get("email") || ""}
-                    className="input-field pl-12"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Photo URL Field */}
-              <div>
-                <label className="block text-white font-semibold mb-2">Photo URL</label>
-                <div className="relative">
-                  <FiImage className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-                  <input
-                    type="url"
-                    name="photoURL"
-                    placeholder="Enter your photo URL"
-                    className="input-field pl-12"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Password Field */}
-              <div>
-                <label className="block text-white font-semibold mb-2">Password</label>
-                <div className="relative">
-                  <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    placeholder="Create a strong password"
-                    className="input-field pl-12 pr-12"
-                    required
-                    onChange={(e) => {
-                      const error = validatePassword(e.target.value);
-                      setPasswordError(error);
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-                  >
-                    {showPassword ? <FiEyeOff className="text-xl" /> : <FiEye className="text-xl" />}
-                  </button>
-                </div>
-
-                {/* Password Requirements */}
-                <div className="mt-2 space-y-1">
-                  <p className="text-xs text-gray-400">Password must contain:</p>
-                  <ul className="text-xs text-gray-400 space-y-1 ml-4">
-                    <li>• At least one uppercase letter</li>
-                    <li>• At least one lowercase letter</li>
-                    <li>• Minimum 6 characters</li>
-                  </ul>
-                </div>
-
-                {/* Password Error */}
-                {passwordError && <p className="text-error text-sm mt-2">{passwordError}</p>}
-              </div>
-
-              {/* Register Button */}
-              <button type="submit" disabled={loading || passwordError} className="btn-primary w-full mt-6">
-                {loading ? <span className="loading loading-spinner loading-sm"></span> : "Register"}
-              </button>
-            </form>
-
-            {/* Divider */}
-            <div className="divider text-gray-400 my-6">OR</div>
-
-            {/* Google Register */}
-            <button
-              onClick={handleGoogleRegister}
-              disabled={loading}
-              className="btn btn-outline w-full text-white hover:bg-white hover:text-black border-white"
-            >
-              <FcGoogle className="text-2xl" />
-              Continue with Google
-            </button>
-
-            {/* Login Link */}
-            <p className="text-center text-gray-400 mt-6">
-              Already have an account?{" "}
-              <Link to="/login" className="text-primary hover:text-secondary font-semibold transition-colors">
-                Login Now
+      <AuthShell title="Sign Up" subtitle="Create a free account to keep your list, rate movies and share reviews.">
+        {error && (
+          <p role="alert" className="mb-5 rounded-[4px] bg-mm-accent px-4 py-3 text-sm font-medium text-mm-on-accent">
+            {error}{" "}
+            {error.includes("already exists") && (
+              <Link to="/login" className="font-bold underline">
+                Sign in
               </Link>
-            </p>
-          </div>
+            )}
+          </p>
+        )}
 
-          {/* Back to Home */}
-          <div className="text-center mt-6">
-            <Link to="/" className="text-gray-400 hover:text-white transition-colors">
-              ← Back to Home
-            </Link>
-          </div>
-        </div>
-      </div>
+        <form onSubmit={handleRegister} noValidate className="flex flex-col gap-4">
+          <AuthField
+            label="Your name"
+            name="name"
+            autoComplete="name"
+            maxLength={MAX_NAME_LENGTH}
+            error={fieldErrors.name}
+            required
+          />
+          <AuthField
+            label="Email address"
+            name="email"
+            type="email"
+            autoComplete="email"
+            defaultValue={searchParams.get("email") || ""}
+            error={fieldErrors.email}
+            required
+          />
+          <AuthField
+            label="Photo URL (optional)"
+            name="photoURL"
+            type="url"
+            autoComplete="photo"
+            error={fieldErrors.photoURL}
+            hint="A link to a picture for your profile. You can add one later."
+          />
+          <AuthField
+            label="Password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={fieldErrors.password}
+            required
+          >
+            <PasswordChecklist password={password} />
+          </AuthField>
+
+          <SubmitButton busy={busy} busyText="Creating account…">
+            Create Account
+          </SubmitButton>
+        </form>
+
+        <GoogleButton onClick={handleGoogle} disabled={busy} />
+
+        <p className="mt-8 text-mm-muted">
+          Already have an account?{" "}
+          <Link to="/login" state={location.state} className="font-semibold text-mm-ink hover:underline">
+            Sign in.
+          </Link>
+        </p>
+        <p className="mt-4 text-xs leading-relaxed text-mm-faint">
+          We'll send a link to your email to make sure it's yours before you can sign in.
+        </p>
+      </AuthShell>
     </>
   );
 };
