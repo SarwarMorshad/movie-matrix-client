@@ -41,13 +41,13 @@ const AuthField = ({ label, type = "text", error, hint, className = "", children
               : "border-white/25 peer-hover:border-white/50 peer-focus:border-mm-accent motion-safe:peer-focus:animate-field-focus peer-focus:drop-shadow-[0_0_4px_rgb(255_176_32/0.35)] peer-focus:peer-hover:border-mm-accent"
           }`}
         >
-          <legend className="invisible block h-[11px] max-w-[0.01px] text-xs whitespace-nowrap transition-[max-width] duration-200 ease-out">
+          <legend className="invisible block h-[11px] max-w-[0.01px] text-xs whitespace-nowrap transition-[max-width] duration-250 ease-[cubic-bezier(0.4,0,0.2,1)]">
             <span className="px-1">{text}</span>
           </legend>
         </fieldset>
         <label
           htmlFor={id}
-          className={`pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-base transition-all duration-200 ease-out peer-focus:top-0 peer-focus:text-xs peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs ${
+          className={`pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-base transition-all duration-250 ease-[cubic-bezier(0.4,0,0.2,1)] peer-focus:top-0 peer-focus:text-xs peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs ${
             error ? "text-mm-danger-ink" : "text-mm-muted peer-focus:text-mm-accent"
           }`}
         >
