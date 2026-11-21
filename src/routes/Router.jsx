@@ -49,11 +49,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/movies/:id",
-        element: (
-          <PrivateRoute>
-            <MovieDetails />
-          </PrivateRoute>
-        ),
+        element: <MovieDetails />, // public; reviewing and My List ask for a login
       },
       {
         path: "/add-movie",

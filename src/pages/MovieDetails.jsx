@@ -1,207 +1,276 @@
-import { useContext, useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
-import LoadingSpinner from "../components/common/LoadingSpinner";
-import toast from "react-hot-toast";
-import { FiStar, FiCalendar, FiFilm, FiGlobe, FiEdit, FiTrash2 } from "react-icons/fi";
-import { MdMovie, MdPerson } from "react-icons/md";
-import * as api from "../api/api";
-import MovieReviews from "../components/movie/MovieReviews";
-import ErrorPage from "./ErrorPage";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { Helmet } from "react-helmet-async";
+import toast from "react-hot-toast";
+import { FiCheck, FiEdit2, FiPlus, FiTrash2 } from "react-icons/fi";
+import * as api from "../api/api";
+import { AuthContext } from "../context/AuthContext";
+import { Button, ConfirmDialog, PosterCard, SectionHeader, Spinner } from "../components/ui";
+import MovieReviews from "../components/movie/MovieReviews";
+import { formatRating, formatRuntime } from "../utils/format";
+
+const Fact = ({ label, children }) =>
+  children ? (
+    <>
+      <dt className="text-mm-muted">{label}</dt>
+      <dd className="m-0 font-semibold text-mm-ink">{children}</dd>
+    </>
+  ) : null;
 
 const MovieDetails = () => {
   const { id } = useParams();
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [movie, setMovie] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [status, setStatus] = useState("loading"); // loading | ready | notFound | error
+  const [similar, setSimilar] = useState([]);
+  const [inWatchlist, setInWatchlist] = useState(false);
+  const [watchBusy, setWatchBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const loadMovie = useCallback(
+    () =>
+      api.getMovie(id).then((data) => {
+        setMovie(data);
+        setStatus("ready");
+        return data;
+      }),
+    [id]
+  );
+
+  // The movie, then "You may also like" from the same genre
   useEffect(() => {
-    fetchMovieDetails();
-  }, [id]);
+    let cancelled = false;
+    setStatus("loading");
+    setSimilar([]);
+    window.scrollTo({ top: 0 });
+    loadMovie()
+      .then((data) => api.browseMovies({ genre: data.genre, limit: 6 }))
+      .then((res) => !cancelled && setSimilar(res.movies.filter((m) => m._id !== id).slice(0, 5)))
+      .catch((error) => {
+        if (cancelled) return;
+        if (error.response?.status === 404 || error.response?.status === 400) setStatus("notFound");
+        else setStatus((s) => (s === "ready" ? s : "error"));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [id, loadMovie]);
 
-  const fetchMovieDetails = async () => {
+  // Is it already on the user's watchlist?
+  useEffect(() => {
+    if (!user) return setInWatchlist(false);
+    api
+      .getWatchlist()
+      .then((list) => setInWatchlist(list.some((m) => m._id === id)))
+      .catch(() => {});
+  }, [user, id]);
+
+  const toggleWatchlist = async () => {
+    if (!user) return navigate("/login", { state: { from: location } });
+    setWatchBusy(true);
     try {
-      setLoading(true);
-      setMovie(await api.getMovie(id));
+      if (inWatchlist) {
+        await api.removeFromWatchlist(id);
+        setInWatchlist(false);
+        toast.success("Removed from My List");
+      } else {
+        await api.addToWatchlist(id);
+        setInWatchlist(true);
+        toast.success("Added to My List");
+      }
     } catch (error) {
-      console.error("Error fetching movie details:", error);
-      toast.error("Failed to load movie details");
+      if (error.response?.status === 409) setInWatchlist(true);
+      else toast.error("Couldn't update My List");
     } finally {
-      setLoading(false);
+      setWatchBusy(false);
     }
   };
 
-  const handleDelete = async () => {
+  const deleteMovie = async () => {
+    setDeleting(true);
     try {
-      setDeleting(true);
       await api.deleteMovie(id);
-      toast.success("Movie deleted successfully!");
-      navigate("/movies");
-    } catch (error) {
-      console.error("Error deleting movie:", error);
-      toast.error("Failed to delete movie");
-    } finally {
+      toast.success(`${movie.title} deleted`);
+      navigate("/movies", { replace: true });
+    } catch {
+      toast.error("Couldn't delete this movie");
       setDeleting(false);
-      setShowDeleteModal(false);
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
+  if (status === "loading") return <Spinner fullPage label="Loading movie" />;
+  if (status !== "ready") {
+    return (
+      <div className="flex flex-col items-center gap-3 px-6 pt-40 pb-24 text-center">
+        <p className="font-display text-2xl font-extrabold text-mm-ink">
+          {status === "notFound" ? "We couldn't find that movie" : "Couldn't load this movie"}
+        </p>
+        <p className="text-mm-muted">
+          {status === "notFound" ? "It may have been deleted." : "Please check your connection and try again."}
+        </p>
+        <Button className="mt-2" to="/movies">
+          Browse movies
+        </Button>
+      </div>
+    );
   }
 
-  if (!movie) {
-    return <ErrorPage></ErrorPage>;
-  }
-
-  const isOwner = user && user.email === movie.addedBy;
+  const isOwner = user && movie.addedBy && user.email?.toLowerCase() === movie.addedBy.toLowerCase();
+  const meta = [movie.releaseYear, movie.genre, formatRuntime(movie.duration), movie.country].filter(Boolean);
 
   return (
     <>
       <Helmet>
-        <title>{movie.title}</title>
-        <meta
-          name="description"
-          content={`Details and reviews for the movie ${movie.title} on Movie Matrix.`}
-        />
+        <title>{movie.title} · Movie Matrix</title>
+        <meta name="description" content={movie.plotSummary?.slice(0, 160) || `${movie.title} on Movie Matrix`} />
       </Helmet>
-      <div className="min-h-screen bg-base-100 mx-auto">
-        {/* Hero Section with Backdrop */}
-        <div className="relative h-[60vh] md:h-[70vh] overflow-hidden">
-          <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-linear-to-t from-base-100 via-base-100/80 to-base-100/40"></div>
-        </div>
 
-        {/* Content */}
-        <div className="container mx-auto px-4 -mt-32 relative z-10">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Poster */}
-            <div className="lg:col-span-1 animate-fadeIn">
-              <img src={movie.posterUrl} alt={movie.title} className="w-full rounded-2xl shadow-2xl" />
-            </div>
-
-            {/* Details */}
-            <div className="lg:col-span-2 space-y-6 animate-fadeIn">
-              {/* Title & Rating */}
-              <div>
-                <h1 className="text-4xl md:text-5xl font-bold text-white font-heading mb-4">{movie.title}</h1>
-                <div className="flex items-center space-x-4 text-lg">
-                  <span className="flex items-center space-x-2 text-secondary">
-                    <FiStar className="text-2xl" />
-                    <span className="font-bold">{movie.rating}</span>
-                  </span>
-                  <span className="text-gray-400">•</span>
-                  <span className="text-gray-300">{movie.releaseYear}</span>
-                  <span className="text-gray-400">•</span>
-                  <span className="text-gray-300">{movie.duration} min</span>
-                </div>
-              </div>
-
-              {/* Genre Badge */}
-              <div>
-                <span className="px-4 py-2 bg-primary/20 text-primary rounded-full font-semibold">
-                  {movie.genre}
-                </span>
-              </div>
-
-              {/* Plot Summary */}
-              <div className="bg-base-200 rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-3">Plot Summary</h3>
-                <p className="text-gray-300 leading-relaxed">{movie.plotSummary}</p>
-              </div>
-
-              {/* Movie Info Grid */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <InfoCard icon={<MdPerson />} label="Director" value={movie.director} />
-                <InfoCard icon={<FiFilm />} label="Cast" value={movie.cast} />
-                <InfoCard icon={<FiGlobe />} label="Language" value={movie.language} />
-                <InfoCard icon={<FiCalendar />} label="Country" value={movie.country} />
-              </div>
-
-              {/* Added By */}
-              <div className="bg-base-200 rounded-xl p-4">
-                <p className="text-gray-400 text-sm">
-                  Added by: <span className="text-white">{movie.addedBy}</span>
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                {isOwner && (
-                  <>
-                    <Link to={`/update-movie/${movie._id}`} className="flex-1">
-                      <button className="btn bg-secondary hover:bg-amber-600 text-white border-none w-full">
-                        <FiEdit className="text-xl" />
-                        Edit Movie
-                      </button>
-                    </Link>
-                    <button
-                      onClick={() => setShowDeleteModal(true)}
-                      className="btn bg-error hover:bg-red-600 text-white border-none flex-1"
-                    >
-                      <FiTrash2 className="text-xl" />
-                      Delete Movie
-                    </button>
-                  </>
-                )}
-                <Link to="/movies" className={isOwner ? "flex-1" : "w-full"}>
-                  <button className="btn btn-outline text-white hover:bg-white hover:text-black border-white w-full">
-                    Back to Movies
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="container mx-auto px-4 mt-16">
-          <MovieReviews movieId={id} />
-        </div>
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteModal && (
-          <div className="modal-backdrop" onClick={() => !deleting && setShowDeleteModal(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h3 className="text-2xl font-bold text-white mb-4">Delete Movie?</h3>
-              <p className="text-gray-400 mb-6">
-                Are you sure you want to delete "{movie.title}"? This action cannot be undone.
-              </p>
-              <div className="flex gap-4">
-                <button onClick={handleDelete} disabled={deleting} className="btn-danger flex-1">
-                  {deleting ? <span className="loading loading-spinner loading-sm"></span> : "Yes, Delete"}
-                </button>
-                <button
-                  onClick={() => setShowDeleteModal(false)}
-                  disabled={deleting}
-                  className="btn-secondary flex-1"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
+      {/* Hero: blurred poster as the backdrop until real backdrops arrive */}
+      <section aria-labelledby="movie-title" className="relative isolate overflow-hidden bg-mm-raised">
+        {movie.posterUrl && (
+          <img
+            src={movie.posterUrl}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 -z-10 size-full scale-110 object-cover opacity-50 blur-2xl"
+          />
         )}
+        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-linear-to-r from-mm-bg via-mm-bg/85 to-mm-bg/40" />
+        <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-linear-to-t from-mm-bg to-transparent" />
 
-        {/* Bottom Spacing */}
-        <div className="h-20"></div>
+        <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-6 pt-28 pb-14 md:flex-row md:items-end md:gap-10">
+          <div className="aspect-2/3 w-[200px] shrink-0 overflow-hidden rounded-lg bg-mm-raised shadow-2xl shadow-black/60 md:w-[260px]">
+            {movie.posterUrl ? (
+              <img src={movie.posterUrl} alt={`${movie.title} poster`} className="size-full object-cover" />
+            ) : (
+              <span className="flex size-full items-end p-4 font-display text-2xl font-extrabold text-mm-ink">{movie.title}</span>
+            )}
+          </div>
+
+          <div className="flex min-w-0 flex-1 flex-col gap-4">
+            <p className="text-sm text-mm-muted">
+              <Link to="/movies" className="hover:text-mm-ink hover:underline">
+                Movies
+              </Link>
+              {movie.genre && (
+                <>
+                  {" › "}
+                  <Link to={`/movies?genre=${encodeURIComponent(movie.genre)}`} className="hover:text-mm-ink hover:underline">
+                    {movie.genre}
+                  </Link>
+                </>
+              )}
+            </p>
+            <h1 id="movie-title" className="font-display text-4xl leading-[1.02] font-extrabold tracking-tight text-mm-ink md:text-[54px]">
+              {movie.title}
+            </h1>
+
+            <div className="flex flex-wrap items-center gap-2.5 text-[13px] text-mm-ink/85">
+              {movie.language && (
+                <span className="rounded-[3px] bg-mm-ink px-2 py-1 font-bold tracking-wider text-mm-bg uppercase">{movie.language}</span>
+              )}
+              <span className="rounded-[3px] border-[1.5px] border-mm-accent px-2 py-[3px] font-bold text-mm-accent">
+                ★ {formatRating(movie.rating)}
+              </span>
+              {meta.map((part, i) => (
+                <span key={part} className="flex items-center gap-2.5">
+                  {i > 0 && (
+                    <span aria-hidden="true" className="text-mm-faint">
+                      •
+                    </span>
+                  )}
+                  {part}
+                </span>
+              ))}
+            </div>
+
+            {movie.plotSummary && <p className="max-w-2xl text-base leading-relaxed text-mm-ink/85">{movie.plotSummary}</p>}
+
+            <div className="flex flex-wrap gap-3 pt-1">
+              <Button
+                size="lg"
+                uppercase
+                variant={inWatchlist ? "secondary" : "primary"}
+                onClick={toggleWatchlist}
+                disabled={watchBusy}
+                aria-pressed={inWatchlist}
+                icon={inWatchlist ? <FiCheck /> : <FiPlus />}
+              >
+                {inWatchlist ? "In My List" : "My List"}
+              </Button>
+              {isOwner && (
+                <>
+                  <Button size="lg" variant="secondary" to={`/update-movie/${movie._id}`} icon={<FiEdit2 />}>
+                    Edit
+                  </Button>
+                  <Button size="lg" variant="danger" onClick={() => setConfirmDelete(true)} icon={<FiTrash2 />}>
+                    Delete
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-14 px-6 pt-6 pb-20">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <h2 className="font-display text-[22px] font-extrabold text-mm-ink">Storyline</h2>
+            <p className="text-base leading-relaxed text-mm-ink/85">{movie.plotSummary || "No summary yet."}</p>
+          </div>
+          <dl className="m-0 grid w-full shrink-0 grid-cols-[110px_1fr] gap-x-4 gap-y-3 rounded-lg border border-mm-border bg-mm-surface p-6 text-sm lg:w-96">
+            <Fact label="Director">{movie.director}</Fact>
+            <Fact label="Cast">{movie.cast}</Fact>
+            <Fact label="Genre">{movie.genre}</Fact>
+            <Fact label="Released">{movie.releaseYear}</Fact>
+            <Fact label="Runtime">{formatRuntime(movie.duration)}</Fact>
+            <Fact label="Country">{movie.country}</Fact>
+            <Fact label="Language">{movie.language}</Fact>
+            <Fact label="Added by">{movie.addedBy}</Fact>
+          </dl>
+        </div>
+
+        <MovieReviews
+          movieId={movie._id}
+          reviews={movie.reviews || []}
+          communityRating={movie.communityRating ?? movie.averageRating}
+          onChanged={loadMovie}
+        />
+
+        {similar.length > 0 && (
+          <section aria-labelledby="similar">
+            <SectionHeader
+              id="similar"
+              eyebrow={`More ${movie.genre}`}
+              title="You May Also Like"
+              action={{ label: "View all", to: `/movies?genre=${encodeURIComponent(movie.genre)}` }}
+            />
+            <ul className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {similar.map((m) => (
+                <li key={m._id}>
+                  <PosterCard movie={m} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        title={`Delete ${movie.title}?`}
+        message="The movie and all its reviews will be removed for everyone. This can't be undone."
+        confirmLabel="Delete movie"
+        busy={deleting}
+        onConfirm={deleteMovie}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </>
-  );
-};
-
-// Info Card Component
-const InfoCard = ({ icon, label, value }) => {
-  return (
-    <div className="bg-base-200 rounded-xl p-4 flex items-start space-x-3">
-      <div className="text-primary text-2xl mt-1">{icon}</div>
-      <div>
-        <p className="text-gray-400 text-sm">{label}</p>
-        <p className="text-white font-semibold">{value}</p>
-      </div>
-    </div>
   );
 };
 
