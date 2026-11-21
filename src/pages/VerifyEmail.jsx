@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { FiMail } from "react-icons/fi";
 import { AuthContext } from "../context/AuthContext";
 import { Button, Spinner } from "../components/ui";
+import { AuthShell } from "../components/auth";
 
 const RESEND_COOLDOWN_S = 60;
 
@@ -81,8 +82,8 @@ const VerifyEmail = () => {
       <Helmet>
         <title>Verify your email · Movie Matrix</title>
       </Helmet>
-      <div className="flex flex-1 items-center justify-center px-6 py-16">
-        <div className="flex w-full max-w-md flex-col items-center gap-5 rounded-xl border border-mm-border bg-mm-surface p-8 text-center">
+      <AuthShell>
+        <div className="flex flex-col items-center gap-5 text-center">
           <span aria-hidden="true" className="flex size-16 items-center justify-center rounded-full bg-mm-accent/15 text-3xl text-mm-accent">
             <FiMail />
           </span>
@@ -112,21 +113,21 @@ const VerifyEmail = () => {
             <>
               <h1 className="font-display text-3xl font-extrabold text-mm-ink">Verify your email</h1>
               <p className="leading-relaxed text-mm-muted">
-                Log in with your email and password to continue. If your email isn't verified yet, we'll help you get a new link.
+                Sign in with your email and password to continue. If your email isn't verified yet, we'll help you get a new link.
               </p>
               <Button size="lg" to="/login" className="w-full">
-                Log in
+                Sign in
               </Button>
               <p className="text-sm text-mm-muted">
                 New here?{" "}
-                <Link to="/register" className="font-semibold text-mm-accent hover:underline">
+                <Link to="/register" className="font-semibold text-mm-ink hover:underline">
                   Create an account
                 </Link>
               </p>
             </>
           )}
         </div>
-      </div>
+      </AuthShell>
     </>
   );
 };
