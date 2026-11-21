@@ -54,10 +54,13 @@ export const addReview = (review) => data(api.post("/reviews", review));
 export const updateReview = (id, review) => data(api.put(`/reviews/${id}`, review));
 export const deleteReview = (id) => data(api.delete(`/reviews/${id}`));
 
-// ---------- Watchlist (always the logged-in user's own list) ----------
-export const getWatchlist = () => data(api.get("/watchlist/me"));
+// ---------- Watchlist / My List (always the logged-in user's own list) ----------
+export const getWatchlist = () => data(api.get("/watchlist/me")); // saved movies only
+export const getMyList = () => data(api.get("/watchlist/me/all")); // { items: [{ type: "movie" | "series", ... }] }
 export const addToWatchlist = (movieId) => data(api.post("/watchlist", { movieId }));
 export const removeFromWatchlist = (movieId) => data(api.delete(`/watchlist/me/${movieId}`));
+export const addSeriesToList = (seriesId) => data(api.post("/watchlist/series", { seriesId }));
+export const removeSeriesFromList = (seriesId) => data(api.delete(`/watchlist/me/series/${seriesId}`));
 
 // ---------- TV series (TMDB data via our server) ----------
 // Lists and searches return { results, page, totalPages, total }; each result is a series card
