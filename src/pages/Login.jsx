@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { isAccountActive } from "../config/auth";
 import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { MdMovie } from "react-icons/md";
@@ -16,6 +17,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   const from = location.state?.from?.pathname || "/";
+  // The verification email's link brings people here with ?verified=1
+  const verifiedFromLink = new URLSearchParams(location.search).get("verified") === "1";
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -35,11 +38,25 @@ const Login = () => {
         photoURL: result.user.photoURL,
       });
 
+      // New accounts must verify their email before they can use the app
+      if (!isAccountActive(result.user)) {
+        toast("Please verify your email to finish signing in");
+        navigate("/verify-email", { replace: true, state: { from: location.state?.from } });
+        return;
+      }
+
       toast.success("Login successful! Welcome back to Movie Matrix");
       navigate(from, { replace: true });
     } catch (error) {
       console.error("Login error:", error);
-      toast.error(error.message || "Invalid email or password");
+      const wrongCredentials = ["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found"];
+      toast.error(
+        wrongCredentials.includes(error.code)
+          ? "Wrong email or password"
+          : error.code === "auth/too-many-requests"
+            ? "Too many attempts. Please wait a moment and try again."
+            : "Couldn't log in, please try again"
+      );
     } finally {
       setLoading(false);
     }
@@ -96,6 +113,13 @@ const Login = () => {
             <h1 className="text-4xl font-bold text-white font-heading mb-2">Welcome Back</h1>
             <p className="text-gray-400">Login to access your movie collection</p>
           </div>
+
+          {/* Shown when arriving from the verification link */}
+          {verifiedFromLink && (
+            <p role="status" className="mb-4 rounded-lg border border-green-500/40 bg-green-500/10 px-4 py-3 text-center text-sm text-green-300">
+              Your email is verified. Log in to continue.
+            </p>
+          )}
 
           {/* Login Form */}
           <div className="bg-base-200 rounded-2xl p-8 shadow-2xl animate-scaleIn">

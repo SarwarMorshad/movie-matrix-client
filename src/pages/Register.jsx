@@ -9,7 +9,7 @@ import * as api from "../api/api";
 import { Helmet } from "react-helmet-async";
 
 const Register = () => {
-  const { createUser, updateUserProfile, signInWithGoogle, setUser } = useContext(AuthContext);
+  const { createUser, updateUserProfile, signInWithGoogle, sendVerificationEmail } = useContext(AuthContext);
   const [searchParams] = useSearchParams(); // ?email= from the landing page form
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -53,28 +53,23 @@ const Register = () => {
     }
 
     try {
-      // Create user
-      const result = await createUser(email, password);
-
-      // Update profile
+      await createUser(email, password);
       await updateUserProfile(name, photoURL);
 
-      // Update local user state
-      setUser({
-        ...result.user,
-        displayName: name,
-        photoURL: photoURL,
-      });
+      // Prove the email is real: the account stays inactive until the link is clicked
+      let linkSent = true;
+      try {
+        await sendVerificationEmail();
+      } catch (sendError) {
+        console.error("Couldn't send verification email:", sendError);
+        linkSent = false; // they can resend from the next page
+      }
 
-      // Save user to database
-      await saveUserToDatabase({
-        name,
-        email,
-        photoURL,
-      });
+      // Save the profile (the server allows this before verification)
+      await saveUserToDatabase({ name, email, photoURL });
 
-      toast.success("Registration successful! Welcome to Movie Matrix");
-      navigate("/");
+      toast.success(linkSent ? "Account created! Check your email to verify it." : "Account created! Send yourself a verification email.");
+      navigate("/verify-email", { replace: true, state: { justSent: linkSent } });
     } catch (error) {
       console.error("Registration error:", error);
 
