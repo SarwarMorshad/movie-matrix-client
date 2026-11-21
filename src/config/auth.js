@@ -1,7 +1,7 @@
 // Email/password accounts created on or after this moment must verify their
 // email before they can use the app. Older accounts are grandfathered.
 // Keep in sync with the server's src/config/auth.js.
-export const VERIFICATION_REQUIRED_SINCE = new Date("2026-11-22T00:00:00Z");
+export const VERIFICATION_REQUIRED_SINCE = new Date("2026-11-21T00:00:00Z");
 
 const usesPassword = (user) => user.providerData.some((p) => p.providerId === "password");
 const usesOtherProvider = (user) => user.providerData.some((p) => p.providerId !== "password");
