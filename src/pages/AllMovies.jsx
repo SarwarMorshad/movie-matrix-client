@@ -59,9 +59,11 @@ const AllMovies = () => {
   const [genres, setGenres] = useState([]);
   const [languages, setLanguages] = useState([]);
 
-  // Change one filter (empty value removes it) and go back to page 1
+  // Change one filter (empty value removes it) and go back to page 1.
+  // Built from the address bar as it is right now (not this render's copy), so
+  // a delayed search-as-you-type update can't bring back cleared filters.
   const update = (changes, { replace = false } = {}) => {
-    const next = new URLSearchParams(params);
+    const next = new URLSearchParams(window.location.search);
     Object.entries(changes).forEach(([key, value]) => (value ? next.set(key, value) : next.delete(key)));
     if (!("page" in changes)) next.delete("page");
     setParams(next, { replace });
