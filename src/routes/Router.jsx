@@ -15,7 +15,7 @@ import Library from "../pages/Library";
 import ErrorPage from "../pages/ErrorPage";
 import PrivateRoute from "./PrivateRoute";
 import Profile from "../pages/Profile";
-import SubscriptionPlans from "../pages/SubscriptionPlans";
+import Plans from "../pages/Plans";
 
 const router = createBrowserRouter([
   {
@@ -106,7 +106,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/plans",
-        element: <SubscriptionPlans></SubscriptionPlans>,
+        element: <Plans />,
       },
     ],
   },
