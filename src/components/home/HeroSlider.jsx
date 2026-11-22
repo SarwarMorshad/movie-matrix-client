@@ -1,127 +1,115 @@
-import { useCallback, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FaPlay } from "react-icons/fa";
-import { FiChevronLeft, FiChevronRight, FiPlus } from "react-icons/fi";
-import { AuthContext } from "../../context/AuthContext";
+import { FiChevronLeft, FiChevronRight, FiInfo } from "react-icons/fi";
 import * as api from "../../api/api";
-import Button from "../ui/Button";
-import { formatRating, formatRuntime } from "../../utils/format";
+import { Button, TrailerModal } from "../ui";
+import { formatRating } from "../../utils/format";
+import { FILM_GENRE_NAMES } from "../../config/movies";
 
-const AUTOPLAY_MS = 7000;
+const AUTOPLAY_MS = 8000;
 
 /**
- * Full-width featured slider. Until real backdrops arrive (TMDB phase), each
- * slide uses the poster twice: blurred and darkened as the background, and
- * sharp on the right.
+ * Full-width featured slider for the signed-in home page: this week's trending
+ * films on their real TMDB backdrops, with "Play trailer" and "More info".
+ *
+ * <HeroSlider films={trending.slice(0, 5)} />
  */
-const HeroSlider = ({ movies }) => {
-  const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
+const HeroSlider = ({ films }) => {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const count = movies.length;
+  const [trailer, setTrailer] = useState(null); // { key, title } while the trailer is open
+  const [loadingTrailer, setLoadingTrailer] = useState(false);
+  const count = films.length;
 
   const go = useCallback((i) => setIndex((i + count) % count), [count]);
 
-  // Auto-advance, unless paused (hover/focus) or the user prefers less motion
+  // Auto-advance, unless paused (hover/focus/trailer) or the user prefers less motion
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (paused || reduceMotion || count < 2) return;
+    if (paused || trailer || reduceMotion || count < 2) return;
     const timer = setTimeout(() => go(index + 1), AUTOPLAY_MS);
     return () => clearTimeout(timer);
-  }, [index, paused, count, go]);
+  }, [index, paused, trailer, count, go]);
 
   if (!count) return null;
-  const movie = movies[index];
+  const film = films[index];
+  const genres = (film.genreIds || []).map((id) => FILM_GENRE_NAMES[id]).filter(Boolean).slice(0, 3);
 
-  const addToWatchlist = async () => {
-    if (!user) return navigate("/login");
+  // The trailer key lives on the details endpoint, so fetch it on demand
+  const playTrailer = async () => {
+    setLoadingTrailer(true);
     try {
-      await api.addToWatchlist(movie._id);
-      toast.success(`${movie.title} added to your watchlist`);
-    } catch (error) {
-      if (error.response?.status === 409) toast("Already in your watchlist");
-      else toast.error("Couldn't add to watchlist");
+      const details = await api.getFilm(film.id);
+      if (details.trailerKey) setTrailer({ key: details.trailerKey, title: film.title });
+      else toast("No trailer for this one yet");
+    } catch {
+      toast.error("Couldn't load the trailer");
+    } finally {
+      setLoadingTrailer(false);
     }
   };
 
   return (
     <section
       aria-roledescription="carousel"
-      aria-label="Featured movies"
+      aria-label="Trending films"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
       className="relative isolate overflow-hidden bg-mm-raised"
     >
-      {/* Background: the poster, blurred */}
-      {movie.posterUrl && (
+      {/* Backdrop */}
+      {film.backdropUrl && (
         <img
-          key={movie._id}
-          src={movie.posterUrl}
+          key={`backdrop-${film.id}`}
+          src={film.backdropUrl}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 -z-10 size-full scale-110 object-cover opacity-60 blur-2xl"
+          className="absolute inset-0 -z-20 size-full object-cover object-top motion-safe:animate-[heroFade_0.9s_ease-out]"
         />
       )}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-linear-to-r from-mm-bg via-mm-bg/80 to-mm-bg/30"
-      />
-      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-48 bg-linear-to-t from-mm-bg to-transparent" />
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-linear-to-r from-mm-bg via-mm-bg/70 to-transparent" />
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 -z-10 h-32 bg-linear-to-b from-black/60 to-transparent" />
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-56 bg-linear-to-t from-mm-bg to-transparent" />
 
       <div
-        key={movie._id}
+        key={`slide-${film.id}`}
         role="group"
         aria-roledescription="slide"
         aria-label={`${index + 1} of ${count}`}
-        className="mx-auto flex min-h-[560px] max-w-[1180px] items-center gap-12 px-6 pt-28 pb-24 motion-safe:animate-fadeIn md:min-h-[640px]"
+        className="flex min-h-[580px] items-end px-4 pt-32 pb-24 motion-safe:animate-fadeIn sm:px-8 md:min-h-[680px] lg:px-14"
       >
-        <div className="flex max-w-2xl flex-1 flex-col gap-[18px]">
+        <div className="flex max-w-2xl flex-col gap-[18px]">
           <p className="font-display text-[13px] font-bold tracking-[0.14em] text-mm-accent uppercase">
-            Featured · #{index + 1} top rated
+            #{index + 1} trending film this week
           </p>
           <h1 className="font-display text-4xl leading-[1.02] font-extrabold tracking-tight text-balance text-mm-ink md:text-6xl">
-            {movie.title}
+            {film.title}
           </h1>
-          <div className="flex flex-wrap items-center gap-2.5 text-[13px] text-mm-ink/80">
-            {movie.language && (
-              <span className="rounded-[3px] bg-mm-ink px-2 py-1 font-bold tracking-wider text-mm-bg uppercase">
-                {movie.language}
-              </span>
-            )}
-            <span className="rounded-[3px] border-[1.5px] border-mm-accent px-2 py-[3px] font-bold text-mm-accent">
-              ★ {formatRating(movie.rating)}
+          <div className="flex flex-wrap items-center gap-2.5 text-sm text-mm-ink/85">
+            <span className="rounded-[3px] border-[1.5px] border-mm-accent px-2 py-[2px] font-bold text-mm-accent">
+              ★ {formatRating(film.rating)}
             </span>
-            {[movie.releaseYear, movie.genre, formatRuntime(movie.duration)].filter(Boolean).map((part, i) => (
-              <span key={part} className="flex items-center gap-2.5">
-                {i > 0 && <span aria-hidden="true" className="text-mm-faint">•</span>}
-                {part}
-              </span>
-            ))}
+            {film.year && <span>{film.year}</span>}
+            {genres.length > 0 && (
+              <>
+                <span aria-hidden="true" className="text-mm-faint">•</span>
+                <span>{genres.join(" · ")}</span>
+              </>
+            )}
           </div>
-          {movie.plotSummary && (
-            <p className="line-clamp-3 max-w-xl text-base leading-relaxed text-mm-ink/80">{movie.plotSummary}</p>
-          )}
+          {film.overview && <p className="line-clamp-3 text-base leading-relaxed text-mm-ink/85 md:text-lg">{film.overview}</p>}
           <div className="flex flex-wrap gap-3 pt-1.5">
-            <Button size="lg" uppercase to={`/movies/${movie._id}`} icon={<FaPlay className="text-xs" />}>
-              View details
+            <Button size="lg" variant="light" onClick={playTrailer} disabled={loadingTrailer} icon={<FaPlay className="text-xs" />}>
+              {loadingTrailer ? "Loading…" : "Play trailer"}
             </Button>
-            <Button size="lg" uppercase variant="secondary" onClick={addToWatchlist} icon={<FiPlus />}>
-              Watchlist
+            <Button size="lg" variant="secondary" to={`/film/${film.id}`} icon={<FiInfo />}>
+              More info
             </Button>
           </div>
         </div>
-
-        {movie.posterUrl && (
-          <img
-            src={movie.posterUrl}
-            alt={`${movie.title} poster`}
-            className="hidden aspect-2/3 w-[260px] shrink-0 rounded-lg object-cover shadow-2xl shadow-black/60 md:block lg:w-[300px]"
-          />
-        )}
       </div>
 
       {count > 1 && (
@@ -129,7 +117,7 @@ const HeroSlider = ({ movies }) => {
           <button
             type="button"
             onClick={() => go(index - 1)}
-            aria-label="Previous featured movie"
+            aria-label="Previous film"
             className="absolute top-1/2 left-4 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-2xl text-white hover:bg-black/60 md:flex"
           >
             <FiChevronLeft aria-hidden="true" />
@@ -137,29 +125,29 @@ const HeroSlider = ({ movies }) => {
           <button
             type="button"
             onClick={() => go(index + 1)}
-            aria-label="Next featured movie"
+            aria-label="Next film"
             className="absolute top-1/2 right-4 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-2xl text-white hover:bg-black/60 md:flex"
           >
             <FiChevronRight aria-hidden="true" />
           </button>
           <div className="absolute inset-x-0 bottom-8 flex justify-center gap-1">
-            {movies.map((m, i) => (
+            {films.map((f, i) => (
               <button
-                key={m._id}
+                key={f.id}
                 type="button"
                 onClick={() => go(i)}
-                aria-label={`Show ${m.title}`}
+                aria-label={`Show ${f.title}`}
                 aria-current={i === index}
                 className="flex size-7 items-center justify-center"
               >
-                <span
-                  className={`h-2 rounded-full transition-all ${i === index ? "w-6 bg-mm-accent" : "w-2 bg-white/45"}`}
-                />
+                <span className={`h-2 rounded-full transition-all ${i === index ? "w-6 bg-mm-accent" : "w-2 bg-white/45"}`} />
               </button>
             ))}
           </div>
         </>
       )}
+
+      <TrailerModal youtubeKey={trailer?.key} title={trailer?.title ?? ""} open={!!trailer} onClose={() => setTrailer(null)} />
     </section>
   );
 };

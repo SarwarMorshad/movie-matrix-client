@@ -71,6 +71,10 @@ export const searchTv = (q, page) => data(api.get("/tv/search", { params: { q, p
 export const getSeries = (id) => data(api.get(`/tv/${id}`));
 export const getSeason = (id, number) => data(api.get(`/tv/${id}/season/${number}`));
 
+// ---------- Films (movies from TMDB via our server) ----------
+export const getFilmList = (list, page) => data(api.get(`/films/lists/${list}`, { params: { page } })); // trending | popular | top_rated | now_playing | upcoming
+export const getFilm = (id) => data(api.get(`/films/${id}`));
+
 // ---------- Users ----------
 export const saveUser = (user) => data(api.post("/users", user));
 export const getMe = () => data(api.get("/users/me")); // includes role and plan

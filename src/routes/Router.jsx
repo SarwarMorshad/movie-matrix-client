@@ -16,6 +16,7 @@ import ErrorPage from "../pages/ErrorPage";
 import PrivateRoute from "./PrivateRoute";
 import Profile from "../pages/Profile";
 import Plans from "../pages/Plans";
+import FilmDetails from "../pages/FilmDetails";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +55,10 @@ const router = createBrowserRouter([
       {
         path: "/tv/:id",
         element: <SeriesDetails />,
+      },
+      {
+        path: "/film/:id",
+        element: <FilmDetails />, // a movie from TMDB
       },
       {
         path: "/movies/:id",

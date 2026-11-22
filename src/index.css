@@ -612,3 +612,13 @@ body.light .alert {
     filter: drop-shadow(0 0 4px rgb(255 176 32 / 0.35));
   }
 }
+
+/* Home hero: each new backdrop fades in */
+@keyframes heroFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
