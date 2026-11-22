@@ -8,3 +8,4 @@ export { default as MediaRow } from "./MediaRow";
 export { default as TrailerModal } from "./TrailerModal";
 export { default as ConfirmDialog } from "./ConfirmDialog";
 export { default as RatingPicker } from "./RatingPicker";
+export { default as TextField } from "./TextField";

@@ -73,7 +73,8 @@ export const getSeason = (id, number) => data(api.get(`/tv/${id}/season/${number
 
 // ---------- Users ----------
 export const saveUser = (user) => data(api.post("/users", user));
-export const getMe = () => data(api.get("/users/me"));
+export const getMe = () => data(api.get("/users/me")); // includes role and plan
+export const updateMe = (changes) => data(api.patch("/users/me", changes)); // { name?, photoURL? }
 
 // ---------- Stats ----------
 export const getMoviesCount = () => data(api.get("/stats/movies-count"));

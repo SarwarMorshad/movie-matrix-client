@@ -281,7 +281,7 @@ const Navbar = () => {
           ) : (
             <Link
               to="/login"
-              className="rounded-[4px] bg-mm-accent px-4 py-1.5 text-sm font-semibold text-mm-on-accent hover:bg-mm-accent-hover"
+              className="rounded-[4px] bg-mm-accent px-4 py-1.5 text-sm font-semibold whitespace-nowrap text-mm-on-accent hover:bg-mm-accent-hover"
             >
               Sign in
             </Link>

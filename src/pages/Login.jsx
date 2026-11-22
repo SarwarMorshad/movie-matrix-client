@@ -6,7 +6,8 @@ import { AuthContext } from "../context/AuthContext";
 import { isAccountActive } from "../config/auth";
 import * as api from "../api/api";
 import { authErrorMessage, isCancelledPopup } from "../utils/authErrors";
-import { AuthShell, AuthField, GoogleButton, SubmitButton } from "../components/auth";
+import { TextField } from "../components/ui";
+import { AuthShell, GoogleButton, SubmitButton } from "../components/auth";
 
 // Save the profile the first time someone signs in; failures aren't worth bothering them with
 const saveProfile = (user) =>
@@ -86,7 +87,7 @@ const Login = () => {
         )}
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <AuthField
+          <TextField
             label="Email address"
             name="email"
             type="email"
@@ -94,7 +95,7 @@ const Login = () => {
             defaultValue={params.get("email") || ""}
             required
           />
-          <AuthField label="Password" name="password" type="password" autoComplete="current-password" required />
+          <TextField label="Password" name="password" type="password" autoComplete="current-password" required />
           <div className="flex items-center justify-between gap-4 text-sm">
             <label className="flex cursor-pointer items-center gap-2 text-mm-muted">
               <input

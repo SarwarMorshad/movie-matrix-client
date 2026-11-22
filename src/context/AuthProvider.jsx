@@ -40,6 +40,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [pendingUser, setPendingUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [, setProfileVersion] = useState(0);
 
   // Sort a Firebase user into `user` or `pendingUser`
   const applyUser = useCallback((firebaseUser) => {
@@ -76,11 +77,12 @@ const AuthProvider = ({ children }) => {
     );
   };
 
-  const updateUserProfile = (name, photo) =>
-    updateProfile(auth.currentUser, {
-      displayName: name,
-      photoURL: photo,
-    });
+  // Firebase changes the user object in place, so bump a counter to make
+  // everything that reads `user` re-render with the new name / photo
+  const updateUserProfile = async (name, photo) => {
+    await updateProfile(auth.currentUser, { displayName: name, photoURL: photo });
+    setProfileVersion((v) => v + 1);
+  };
 
   const resetPassword = (email) => sendPasswordResetEmail(auth, email);
 
@@ -116,7 +118,6 @@ const AuthProvider = ({ children }) => {
   const authData = {
     user,
     pendingUser,
-    setUser,
     loading,
     createUser,
     signInUser,

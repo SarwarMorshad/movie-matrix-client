@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
@@ -15,8 +15,7 @@ import Library from "../pages/Library";
 import ErrorPage from "../pages/ErrorPage";
 import PrivateRoute from "./PrivateRoute";
 import Profile from "../pages/Profile";
-import EditProfile from "../pages/EditProfile";
-import SubscriptionPlans from "../pages/SubscriptionPlans";
+import Plans from "../pages/Plans";
 
 const router = createBrowserRouter([
   {
@@ -101,16 +100,13 @@ const router = createBrowserRouter([
         ),
       },
       {
+        // Editing now happens on the profile page itself
         path: "/edit-profile",
-        element: (
-          <PrivateRoute>
-            <EditProfile />
-          </PrivateRoute>
-        ),
+        element: <Navigate to="/profile?edit=1" replace />,
       },
       {
         path: "/plans",
-        element: <SubscriptionPlans></SubscriptionPlans>,
+        element: <Plans />,
       },
     ],
   },
