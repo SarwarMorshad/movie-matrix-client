@@ -6,14 +6,22 @@ import * as api from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
 import { Button } from "../ui";
 
+// How to add / remove each kind of title
+const ACTIONS = {
+  movie: { add: api.addToWatchlist, remove: api.removeFromWatchlist }, // a member's movie (MongoDB id)
+  series: { add: api.addSeriesToList, remove: api.removeSeriesFromList }, // TMDB series id
+  film: { add: api.addFilmToList, remove: api.removeFilmFromList }, // TMDB movie id
+};
+
 /**
- * "+ My List" / "✓ In My List" toggle for a movie (MongoDB id) or a series (TMDB id).
+ * "+ My List" / "✓ In My List" toggle for a movie (MongoDB id), a series or a film (TMDB ids).
  * Logged-out users are sent to log in and brought back afterwards.
  *
  * <MyListButton type="movie" id={movie._id} />
  * <MyListButton type="series" id={series.id} />
+ * <MyListButton type="film" id={film.id} />
  */
-const MyListButton = ({ type, id, size = "lg" }) => {
+const MyListButton = ({ type, id, size = "lg", variant }) => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,11 +48,11 @@ const MyListButton = ({ type, id, size = "lg" }) => {
     setBusy(true);
     try {
       if (inList) {
-        await (type === "movie" ? api.removeFromWatchlist(id) : api.removeSeriesFromList(id));
+        await ACTIONS[type].remove(id);
         setInList(false);
         toast.success("Removed from My List");
       } else {
-        await (type === "movie" ? api.addToWatchlist(id) : api.addSeriesToList(id));
+        await ACTIONS[type].add(id);
         setInList(true);
         toast.success("Added to My List");
       }
@@ -60,7 +68,7 @@ const MyListButton = ({ type, id, size = "lg" }) => {
     <Button
       size={size}
       uppercase
-      variant={inList ? "secondary" : "primary"}
+      variant={inList ? "secondary" : (variant ?? "primary")}
       onClick={toggle}
       disabled={busy}
       aria-pressed={inList}

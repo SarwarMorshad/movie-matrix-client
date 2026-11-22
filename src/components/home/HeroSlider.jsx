@@ -6,12 +6,13 @@ import * as api from "../../api/api";
 import { Button, TrailerModal } from "../ui";
 import { formatRating } from "../../utils/format";
 import { FILM_GENRE_NAMES } from "../../config/movies";
+import MyListButton from "../common/MyListButton";
 
 const AUTOPLAY_MS = 8000;
 
 /**
  * Full-width featured slider for the signed-in home page: this week's trending
- * films on their real TMDB backdrops, with "Play trailer" and "More info".
+ * films on their real TMDB backdrops, with "Play trailer", "More info" and My List.
  *
  * <HeroSlider films={trending.slice(0, 5)} />
  */
@@ -108,6 +109,7 @@ const HeroSlider = ({ films }) => {
             <Button size="lg" variant="secondary" to={`/film/${film.id}`} icon={<FiInfo />}>
               More info
             </Button>
+            <MyListButton type="film" id={film.id} variant="secondary" />
           </div>
         </div>
       </div>

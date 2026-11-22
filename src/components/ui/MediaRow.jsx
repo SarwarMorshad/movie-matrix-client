@@ -1,12 +1,14 @@
 import { useRef } from "react";
+import { Link } from "react-router";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 /**
  * Netflix-style horizontal row: a title, then cards that scroll sideways with arrow buttons.
  *
  * <MediaRow id="trending" title="Trending Now" items={series} renderItem={(s) => <SeriesCard series={s} />} />
+ * <MediaRow ... action={{ label: "See all", to: "/movies/community" }} />   // optional link beside the title
  */
-const MediaRow = ({ id, title, items, renderItem, getKey = (item) => item.id ?? item._id }) => {
+const MediaRow = ({ id, title, items, renderItem, action, getKey = (item) => item.id ?? item._id }) => {
   const rowRef = useRef(null);
   const scroll = (dir) => rowRef.current?.scrollBy({ left: dir * rowRef.current.clientWidth * 0.85, behavior: "smooth" });
   const arrow =
@@ -16,9 +18,16 @@ const MediaRow = ({ id, title, items, renderItem, getKey = (item) => item.id ?? 
 
   return (
     <section aria-labelledby={id} className="group/row">
-      <h2 id={id} className="mb-3 px-4 font-display text-lg font-bold text-mm-ink sm:px-8 md:text-xl lg:px-14">
-        {title}
-      </h2>
+      <div className="mb-3 flex items-baseline gap-4 px-4 sm:px-8 lg:px-14">
+        <h2 id={id} className="font-display text-lg font-bold text-mm-ink md:text-xl">
+          {title}
+        </h2>
+        {action && (
+          <Link to={action.to} className="text-sm font-semibold text-mm-accent hover:underline">
+            {action.label} ›
+          </Link>
+        )}
+      </div>
       <div className="relative">
         <button type="button" onClick={() => scroll(-1)} aria-label={`Scroll ${title} left`} className={`${arrow} left-2`}>
           <FiChevronLeft aria-hidden="true" />
