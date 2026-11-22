@@ -87,13 +87,13 @@ const BrowseHome = () => {
       </div>
 
       {topRated.length > 0 && (
-        <Section id="top-rated" eyebrow="From the community" title="Members' Top Rated" action={{ label: "View all", to: "/movies" }}>
+        <Section id="top-rated" eyebrow="From the community" title="Members' Top Rated" action={{ label: "View all", to: "/movies/community" }}>
           <PosterGrid movies={topRated} />
         </Section>
       )}
 
       {recent.length > 0 && (
-        <Section id="recent" eyebrow="Just added" title="Recently Added by Members" action={{ label: "View all", to: "/movies" }}>
+        <Section id="recent" eyebrow="Just added" title="Recently Added by Members" action={{ label: "View all", to: "/movies/community" }}>
           <PosterGrid movies={recent} badge="New" />
         </Section>
       )}

@@ -6,6 +6,7 @@ import Register from "../pages/Register";
 import VerifyEmail from "../pages/VerifyEmail";
 import ForgotPassword from "../pages/ForgotPassword";
 import AllMovies from "../pages/AllMovies";
+import Movies from "../pages/Movies";
 import TvShows from "../pages/TvShows";
 import SeriesDetails from "../pages/SeriesDetails";
 import MovieDetails from "../pages/MovieDetails";
@@ -46,7 +47,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/movies",
-        element: <AllMovies />,
+        element: <Movies />, // TMDB films, laid out like TV Shows
+      },
+      {
+        path: "/movies/community",
+        element: <AllMovies />, // the members' own movies, with search and filters
       },
       {
         path: "/tv",

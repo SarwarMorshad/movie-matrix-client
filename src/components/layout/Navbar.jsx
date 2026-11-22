@@ -47,7 +47,7 @@ const ExpandingSearch = () => {
     e.preventDefault();
     const q = query.trim();
     if (!q) return;
-    navigate(`/movies?search=${encodeURIComponent(q)}`);
+    navigate(`/movies/community?search=${encodeURIComponent(q)}`); // members' movies until search covers everything
   };
 
   const close = () => {

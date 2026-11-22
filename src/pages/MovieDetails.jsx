@@ -121,13 +121,13 @@ const MovieDetails = () => {
 
           <div className="flex min-w-0 flex-1 flex-col gap-4">
             <p className="text-sm text-mm-muted">
-              <Link to="/movies" className="hover:text-mm-ink hover:underline">
-                Movies
+              <Link to="/movies/community" className="hover:text-mm-ink hover:underline">
+                Members' movies
               </Link>
               {movie.genre && (
                 <>
                   {" › "}
-                  <Link to={`/movies?genre=${encodeURIComponent(movie.genre)}`} className="hover:text-mm-ink hover:underline">
+                  <Link to={`/movies/community?genre=${encodeURIComponent(movie.genre)}`} className="hover:text-mm-ink hover:underline">
                     {movie.genre}
                   </Link>
                 </>
@@ -206,7 +206,7 @@ const MovieDetails = () => {
               id="similar"
               eyebrow={`More ${movie.genre}`}
               title="You May Also Like"
-              action={{ label: "View all", to: `/movies?genre=${encodeURIComponent(movie.genre)}` }}
+              action={{ label: "View all", to: `/movies/community?genre=${encodeURIComponent(movie.genre)}` }}
             />
             <ul className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {similar.map((m) => (

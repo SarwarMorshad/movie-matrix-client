@@ -125,16 +125,16 @@ const AllMovies = () => {
   return (
     <>
       <Helmet>
-        <title>{genre ? `${genre} movies` : "All movies"} · Movie Matrix</title>
-        <meta name="description" content="Browse, search and filter every movie on Movie Matrix." />
+        <title>{genre ? `${genre} · Members' movies` : "Members' movies"} · Movie Matrix</title>
+        <meta name="description" content="Browse, search and filter the movies Movie Matrix members have added." />
       </Helmet>
 
       <div className="border-b border-mm-border bg-mm-surface">
         <div className="mx-auto flex max-w-[1180px] flex-col gap-5 px-6 pt-9 pb-7">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="mb-1.5 font-display text-xs font-bold tracking-[0.16em] text-mm-accent uppercase">Browse</p>
-              <h1 className="font-display text-4xl font-extrabold text-mm-ink">{genre ? `${genre} Movies` : "All Movies"}</h1>
+              <p className="mb-1.5 font-display text-xs font-bold tracking-[0.16em] text-mm-accent uppercase">From our members</p>
+              <h1 className="font-display text-4xl font-extrabold text-mm-ink">{genre ? `${genre} Movies` : "Members' Movies"}</h1>
             </div>
             <p aria-live="polite" className="text-sm text-mm-muted">
               {result && (result.total ? `Showing ${from}–${to} of ${result.total} movies` : "No movies found")}
