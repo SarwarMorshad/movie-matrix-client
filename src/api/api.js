@@ -56,11 +56,13 @@ export const deleteReview = (id) => data(api.delete(`/reviews/${id}`));
 
 // ---------- Watchlist / My List (always the logged-in user's own list) ----------
 export const getWatchlist = () => data(api.get("/watchlist/me")); // saved movies only
-export const getMyList = () => data(api.get("/watchlist/me/all")); // { items: [{ type: "movie" | "series", ... }] }
+export const getMyList = () => data(api.get("/watchlist/me/all")); // { items: [{ type: "movie" | "series" | "film", ... }] }
 export const addToWatchlist = (movieId) => data(api.post("/watchlist", { movieId }));
 export const removeFromWatchlist = (movieId) => data(api.delete(`/watchlist/me/${movieId}`));
 export const addSeriesToList = (seriesId) => data(api.post("/watchlist/series", { seriesId }));
 export const removeSeriesFromList = (seriesId) => data(api.delete(`/watchlist/me/series/${seriesId}`));
+export const addFilmToList = (filmId) => data(api.post("/watchlist/films", { filmId }));
+export const removeFilmFromList = (filmId) => data(api.delete(`/watchlist/me/films/${filmId}`));
 
 // ---------- TV series (TMDB data via our server) ----------
 // Lists and searches return { results, page, totalPages, total }; each result is a series card
@@ -74,6 +76,8 @@ export const getSeason = (id, number) => data(api.get(`/tv/${id}/season/${number
 // ---------- Films (movies from TMDB via our server) ----------
 export const getFilmList = (list, page) => data(api.get(`/films/lists/${list}`, { params: { page } })); // trending | popular | top_rated | now_playing | upcoming
 export const getFilm = (id) => data(api.get(`/films/${id}`));
+export const getFilmGenres = () => data(api.get("/films/genres")); // [{ id, name }]
+export const discoverFilms = (params) => data(api.get("/films/discover", { params })); // { genre, sort, page }
 
 // ---------- Users ----------
 export const saveUser = (user) => data(api.post("/users", user));
