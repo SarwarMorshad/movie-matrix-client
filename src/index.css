@@ -531,15 +531,6 @@ body.light .loading {
   color: #e50914;
 }
 
-/* Smooth Transitions */
-body {
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-body * {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
 /* Scrollbar - Light Theme */
 body.light ::-webkit-scrollbar {
   width: 12px;
@@ -579,5 +570,45 @@ body.light .alert {
 @media (max-width: 768px) {
   body.light .mobile-menu {
     background-color: #ffffff !important;
+  }
+}
+
+/* Sign in <-> Sign up: the form and picture panels swap sides (see AuthShell) */
+::view-transition-group(auth-form),
+::view-transition-group(auth-picture) {
+  animation-duration: 0.7s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+::view-transition-old(auth-form),
+::view-transition-new(auth-form) {
+  animation-duration: 0.35s;
+}
+::view-transition-new(auth-form) {
+  animation-delay: 0.3s;
+  animation-fill-mode: both;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* Auth fields: the outline flares gold when a field gets focus, then settles
+   into a soft glow. drop-shadow follows the drawn border, so the gap the label
+   sits in stays clear. */
+@utility animate-field-focus {
+  animation: field-focus 0.6s ease-out;
+}
+@keyframes field-focus {
+  0% {
+    filter: drop-shadow(0 0 0 rgb(255 176 32 / 0));
+  }
+  40% {
+    filter: drop-shadow(0 0 10px rgb(255 176 32 / 0.85));
+  }
+  100% {
+    filter: drop-shadow(0 0 4px rgb(255 176 32 / 0.35));
   }
 }

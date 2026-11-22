@@ -12,10 +12,16 @@ import {
   updateProfile,
   sendPasswordResetEmail,
   sendEmailVerification,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
 } from "firebase/auth";
 import { AuthContext } from "./AuthContext";
 
 const googleProvider = new GoogleAuthProvider();
+
+// "Remember me": stay signed in after the browser closes, or only for this tab session
+const rememberSignIn = (remember) => setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
 
 // Keeps `loading` honest when a Firebase call fails (no auth-state change follows)
 const withLoading = (setLoading, promise) =>
@@ -54,14 +60,20 @@ const AuthProvider = ({ children }) => {
     return withLoading(setLoading, createUserWithEmailAndPassword(auth, email, password));
   };
 
-  const signInUser = (email, password) => {
+  const signInUser = (email, password, remember = true) => {
     setLoading(true);
-    return withLoading(setLoading, signInWithEmailAndPassword(auth, email, password));
+    return withLoading(
+      setLoading,
+      rememberSignIn(remember).then(() => signInWithEmailAndPassword(auth, email, password))
+    );
   };
 
-  const signInWithGoogle = () => {
+  const signInWithGoogle = (remember = true) => {
     setLoading(true);
-    return withLoading(setLoading, signInWithPopup(auth, googleProvider));
+    return withLoading(
+      setLoading,
+      rememberSignIn(remember).then(() => signInWithPopup(auth, googleProvider))
+    );
   };
 
   const updateUserProfile = (name, photo) =>

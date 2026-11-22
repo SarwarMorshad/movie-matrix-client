@@ -3,3 +3,8 @@
 const HERO_PAGES = [/^\/$/, /^\/tv$/, /^\/tv\/\d+$/, /^\/movies\/[a-f\d]{24}$/i];
 
 export const hasHero = (pathname) => HERO_PAGES.some((pattern) => pattern.test(pathname));
+
+// Log in / sign up pages: a full-screen split layout with no navbar or footer
+const AUTH_PAGES = ["/login", "/register", "/forgot-password", "/verify-email"];
+
+export const isAuthPage = (pathname) => AUTH_PAGES.includes(pathname);
