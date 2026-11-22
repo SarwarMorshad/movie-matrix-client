@@ -63,7 +63,7 @@ const HeroSlider = ({ films }) => {
       {/* Backdrop */}
       {film.backdropUrl && (
         <img
-          key={film.id}
+          key={`backdrop-${film.id}`}
           src={film.backdropUrl}
           alt=""
           aria-hidden="true"
@@ -75,7 +75,7 @@ const HeroSlider = ({ films }) => {
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-56 bg-linear-to-t from-mm-bg to-transparent" />
 
       <div
-        key={film.id}
+        key={`slide-${film.id}`}
         role="group"
         aria-roledescription="slide"
         aria-label={`${index + 1} of ${count}`}
