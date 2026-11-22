@@ -6,8 +6,15 @@ import { FiEdit2, FiPlus, FiTrash2, FiX } from "react-icons/fi";
 import * as api from "../api/api";
 import { Button, ConfirmDialog, PosterCard, Spinner } from "../components/ui";
 import SeriesCard from "../components/tv/SeriesCard";
+import FilmCard from "../components/film/FilmCard";
 
-// One page, two tabs: /my-watchlist (My List: movies + series) and /my-collection (movies you added)
+// One page, two tabs: /my-watchlist (My List: movies, films and series) and /my-collection (movies you added)
+
+// How to remove each kind of title, and which filter it belongs to.
+// "movie" = a member's movie (MongoDB), "film" = a movie from TMDB; both count as Movies.
+const REMOVE = { movie: api.removeFromWatchlist, film: api.removeFilmFromList, series: api.removeSeriesFromList };
+const filterOf = (item) => (item.type === "series" ? "series" : "movie");
+const keyOf = (item) => (item.type === "movie" ? item._id : item.id);
 
 const TABS = [
   { path: "/my-watchlist", key: "list", label: "My List" },
@@ -49,10 +56,9 @@ const MyListTab = () => {
   }, []);
 
   const remove = async (item) => {
-    const key = item.type === "movie" ? item._id : item.id;
     setItems((list) => list.filter((i) => i !== item)); // update right away
     try {
-      await (item.type === "movie" ? api.removeFromWatchlist(key) : api.removeSeriesFromList(key));
+      await REMOVE[item.type](keyOf(item));
       toast.success(`${item.title} removed from My List`);
     } catch {
       setItems((list) => [item, ...list]);
@@ -63,9 +69,9 @@ const MyListTab = () => {
   if (error) return <LoadError />;
   if (!items) return <Spinner fullPage label="Loading My List" />;
 
-  const counts = { all: items.length, movie: items.filter((i) => i.type === "movie").length };
+  const counts = { all: items.length, movie: items.filter((i) => filterOf(i) === "movie").length };
   counts.series = counts.all - counts.movie;
-  const shown = filter === "all" ? items : items.filter((i) => i.type === filter);
+  const shown = filter === "all" ? items : items.filter((i) => filterOf(i) === filter);
 
   if (!items.length) {
     return (
@@ -104,8 +110,14 @@ const MyListTab = () => {
       ) : (
         <ul className={grid}>
           {shown.map((item) => (
-            <li key={`${item.type}-${item.type === "movie" ? item._id : item.id}`}>
-              {item.type === "movie" ? <PosterCard movie={item} /> : <SeriesCard series={item} badge="TV" />}
+            <li key={`${item.type}-${keyOf(item)}`}>
+              {item.type === "movie" ? (
+                <PosterCard movie={item} />
+              ) : item.type === "film" ? (
+                <FilmCard film={item} />
+              ) : (
+                <SeriesCard series={item} badge="TV" />
+              )}
               <Button size="sm" variant="outline" icon={<FiX />} className="mt-3 w-full" onClick={() => remove(item)} aria-label={`Remove ${item.title} from My List`}>
                 Remove
               </Button>
