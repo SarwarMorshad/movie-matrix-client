@@ -5,8 +5,7 @@ import { AuthContext } from "../../context/AuthContext";
 import * as api from "../../api/api";
 import PosterWall from "../common/PosterWall";
 import usePosterUrls from "../../hooks/usePosterUrls";
-import { AuthField } from "../auth";
-import { Button } from "../ui";
+import { Button, TextField } from "../ui";
 import Avatar from "./Avatar";
 
 const MAX_NAME_LENGTH = 60; // same limit as the server
@@ -90,7 +89,7 @@ const ProfileBanner = ({ planName, startEditing = false }) => {
             <h1 id="profile-name" className="font-display text-2xl font-extrabold text-mm-ink">
               Edit profile
             </h1>
-            <AuthField
+            <TextField
               label="Your name"
               name="name"
               autoComplete="name"
@@ -101,7 +100,7 @@ const ProfileBanner = ({ planName, startEditing = false }) => {
               required
               autoFocus
             />
-            <AuthField
+            <TextField
               label="Photo URL (optional)"
               name="photoURL"
               type="url"

@@ -6,7 +6,8 @@ import { AuthContext } from "../context/AuthContext";
 import * as api from "../api/api";
 import { passwordMeetsRules } from "../utils/password";
 import { authErrorMessage, isCancelledPopup } from "../utils/authErrors";
-import { AuthShell, AuthField, GoogleButton, SubmitButton, PasswordChecklist } from "../components/auth";
+import { TextField } from "../components/ui";
+import { AuthShell, GoogleButton, SubmitButton, PasswordChecklist } from "../components/auth";
 
 const MAX_NAME_LENGTH = 60; // same limit as the server
 
@@ -114,7 +115,7 @@ const Register = () => {
         )}
 
         <form onSubmit={handleRegister} noValidate className="flex flex-col gap-4">
-          <AuthField
+          <TextField
             label="Your name"
             name="name"
             autoComplete="name"
@@ -122,7 +123,7 @@ const Register = () => {
             error={fieldErrors.name}
             required
           />
-          <AuthField
+          <TextField
             label="Email address"
             name="email"
             type="email"
@@ -131,7 +132,7 @@ const Register = () => {
             error={fieldErrors.email}
             required
           />
-          <AuthField
+          <TextField
             label="Photo URL (optional)"
             name="photoURL"
             type="url"
@@ -139,7 +140,7 @@ const Register = () => {
             error={fieldErrors.photoURL}
             hint="A link to a picture for your profile. You can add one later."
           />
-          <AuthField
+          <TextField
             label="Password"
             name="password"
             type="password"
@@ -150,7 +151,7 @@ const Register = () => {
             required
           >
             <PasswordChecklist password={password} />
-          </AuthField>
+          </TextField>
 
           <SubmitButton busy={busy} busyText="Creating account…">
             Create Account

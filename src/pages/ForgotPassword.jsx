@@ -3,7 +3,8 @@ import { Link, useSearchParams } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { FiMail } from "react-icons/fi";
 import { AuthContext } from "../context/AuthContext";
-import { AuthShell, AuthField, SubmitButton } from "../components/auth";
+import { TextField } from "../components/ui";
+import { AuthShell, SubmitButton } from "../components/auth";
 
 /**
  * Sends a password reset link. The result message is the same whether or not
@@ -70,7 +71,7 @@ const ForgotPassword = () => {
             </p>
           )}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <AuthField
+            <TextField
               label="Email address"
               name="email"
               type="email"
