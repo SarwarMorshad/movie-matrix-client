@@ -34,7 +34,7 @@ const Profile = () => {
     try {
       const [moviesRes, watchlistRes, reviewsRes] = await Promise.all([
         api.getMyMovies(),
-        api.getWatchlist(),
+        api.getMyList().then((r) => r.items), // movies + series
         api.getMyReviews(),
       ]);
 

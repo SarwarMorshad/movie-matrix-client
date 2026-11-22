@@ -1,12 +1,13 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { Helmet } from "react-helmet-async";
 import toast from "react-hot-toast";
-import { FiCheck, FiEdit2, FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import * as api from "../api/api";
 import { AuthContext } from "../context/AuthContext";
 import { Button, ConfirmDialog, PosterCard, SectionHeader, Spinner } from "../components/ui";
 import MovieReviews from "../components/movie/MovieReviews";
+import MyListButton from "../components/common/MyListButton";
 import { formatRating, formatRuntime } from "../utils/format";
 
 const Fact = ({ label, children }) =>
@@ -21,13 +22,10 @@ const MovieDetails = () => {
   const { id } = useParams();
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [movie, setMovie] = useState(null);
   const [status, setStatus] = useState("loading"); // loading | ready | notFound | error
   const [similar, setSimilar] = useState([]);
-  const [inWatchlist, setInWatchlist] = useState(false);
-  const [watchBusy, setWatchBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -59,36 +57,6 @@ const MovieDetails = () => {
       cancelled = true;
     };
   }, [id, loadMovie]);
-
-  // Is it already on the user's watchlist?
-  useEffect(() => {
-    if (!user) return setInWatchlist(false);
-    api
-      .getWatchlist()
-      .then((list) => setInWatchlist(list.some((m) => m._id === id)))
-      .catch(() => {});
-  }, [user, id]);
-
-  const toggleWatchlist = async () => {
-    if (!user) return navigate("/login", { state: { from: location } });
-    setWatchBusy(true);
-    try {
-      if (inWatchlist) {
-        await api.removeFromWatchlist(id);
-        setInWatchlist(false);
-        toast.success("Removed from My List");
-      } else {
-        await api.addToWatchlist(id);
-        setInWatchlist(true);
-        toast.success("Added to My List");
-      }
-    } catch (error) {
-      if (error.response?.status === 409) setInWatchlist(true);
-      else toast.error("Couldn't update My List");
-    } finally {
-      setWatchBusy(false);
-    }
-  };
 
   const deleteMovie = async () => {
     setDeleting(true);
@@ -191,17 +159,7 @@ const MovieDetails = () => {
             {movie.plotSummary && <p className="max-w-2xl text-base leading-relaxed text-mm-ink/85">{movie.plotSummary}</p>}
 
             <div className="flex flex-wrap gap-3 pt-1">
-              <Button
-                size="lg"
-                uppercase
-                variant={inWatchlist ? "secondary" : "primary"}
-                onClick={toggleWatchlist}
-                disabled={watchBusy}
-                aria-pressed={inWatchlist}
-                icon={inWatchlist ? <FiCheck /> : <FiPlus />}
-              >
-                {inWatchlist ? "In My List" : "My List"}
-              </Button>
+              <MyListButton type="movie" id={movie._id} />
               {isOwner && (
                 <>
                   <Button size="lg" variant="secondary" to={`/update-movie/${movie._id}`} icon={<FiEdit2 />}>

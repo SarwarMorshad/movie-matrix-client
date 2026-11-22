@@ -10,8 +10,7 @@ import SeriesDetails from "../pages/SeriesDetails";
 import MovieDetails from "../pages/MovieDetails";
 import AddMovie from "../pages/AddMovie";
 import UpdateMovie from "../pages/UpdateMovie";
-import MyCollection from "../pages/MyCollection";
-import MyWatchlist from "../pages/MyWatchlist";
+import Library from "../pages/Library";
 import ErrorPage from "../pages/ErrorPage";
 import PrivateRoute from "./PrivateRoute";
 import Profile from "../pages/Profile";
@@ -76,7 +75,7 @@ const router = createBrowserRouter([
         path: "/my-collection",
         element: (
           <PrivateRoute>
-            <MyCollection />
+            <Library />
           </PrivateRoute>
         ),
       },
@@ -84,7 +83,7 @@ const router = createBrowserRouter([
         path: "/my-watchlist",
         element: (
           <PrivateRoute>
-            <MyWatchlist />
+            <Library />
           </PrivateRoute>
         ),
       },
