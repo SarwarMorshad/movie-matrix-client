@@ -6,6 +6,7 @@ import * as api from "../api/api";
 import { Button, MediaRow, Spinner, TrailerModal } from "../components/ui";
 import FilmCard from "../components/film/FilmCard";
 import CastRow from "../components/tv/CastRow";
+import MyListButton from "../components/common/MyListButton";
 import { formatRating, formatRuntime } from "../utils/format";
 
 const Fact = ({ label, children }) =>
@@ -99,13 +100,14 @@ const FilmDetails = () => {
             {film.genres.length > 0 && <span>{film.genres.slice(0, 3).join(" · ")}</span>}
           </div>
           {film.overview && <p className="max-w-2xl text-base leading-relaxed text-mm-ink/90 md:text-lg">{film.overview}</p>}
-          {film.trailerKey && (
-            <div className="pt-1">
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            {film.trailerKey && (
               <Button size="lg" variant="light" onClick={() => setTrailerOpen(true)} icon={<FaPlay className="text-xs" />}>
                 Play trailer
               </Button>
-            </div>
-          )}
+            )}
+            <MyListButton type="film" id={film.id} />
+          </div>
         </div>
       </section>
 
