@@ -5,18 +5,25 @@ import { FiChevronLeft, FiChevronRight, FiInfo } from "react-icons/fi";
 import * as api from "../../api/api";
 import { Button, TrailerModal } from "../ui";
 import { formatRating } from "../../utils/format";
-import { FILM_GENRE_NAMES } from "../../config/movies";
+import { FILM_GENRE_NAMES, TV_GENRE_NAMES } from "../../config/movies";
 import MyListButton from "../common/MyListButton";
 
 const AUTOPLAY_MS = 8000;
 
+// What differs between a film slide and a series slide
+const KINDS = {
+  film: { noun: "film", genres: FILM_GENRE_NAMES, page: (id) => `/film/${id}`, details: api.getFilm },
+  series: { noun: "series", genres: TV_GENRE_NAMES, page: (id) => `/tv/${id}`, details: api.getSeries },
+};
+
 /**
  * Full-width featured slider for the signed-in home page: this week's trending
- * films on their real TMDB backdrops, with "Play trailer", "More info" and My List.
+ * films and series on their real TMDB backdrops, with "Play trailer", "More info" and My List.
+ * Each item has `type` "film" or "series" (as the server sends them) and `rank` in its own trending list.
  *
- * <HeroSlider films={trending.slice(0, 5)} />
+ * <HeroSlider items={[...films, ...series]} />
  */
-const HeroSlider = ({ films }) => {
+const HeroSlider = ({ items: films }) => {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [trailer, setTrailer] = useState(null); // { key, title } while the trailer is open
@@ -35,13 +42,14 @@ const HeroSlider = ({ films }) => {
 
   if (!count) return null;
   const film = films[index];
-  const genres = (film.genreIds || []).map((id) => FILM_GENRE_NAMES[id]).filter(Boolean).slice(0, 3);
+  const kind = KINDS[film.type] || KINDS.film;
+  const genres = (film.genreIds || []).map((id) => kind.genres[id]).filter(Boolean).slice(0, 3);
 
   // The trailer key lives on the details endpoint, so fetch it on demand
   const playTrailer = async () => {
     setLoadingTrailer(true);
     try {
-      const details = await api.getFilm(film.id);
+      const details = await kind.details(film.id);
       if (details.trailerKey) setTrailer({ key: details.trailerKey, title: film.title });
       else toast("No trailer for this one yet");
     } catch {
@@ -54,7 +62,7 @@ const HeroSlider = ({ films }) => {
   return (
     <section
       aria-roledescription="carousel"
-      aria-label="Trending films"
+      aria-label="Trending now"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
@@ -64,7 +72,7 @@ const HeroSlider = ({ films }) => {
       {/* Backdrop */}
       {film.backdropUrl && (
         <img
-          key={`backdrop-${film.id}`}
+          key={`backdrop-${film.type}-${film.id}`}
           src={film.backdropUrl}
           alt=""
           aria-hidden="true"
@@ -76,7 +84,7 @@ const HeroSlider = ({ films }) => {
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-56 bg-linear-to-t from-mm-bg to-transparent" />
 
       <div
-        key={`slide-${film.id}`}
+        key={`slide-${film.type}-${film.id}`}
         role="group"
         aria-roledescription="slide"
         aria-label={`${index + 1} of ${count}`}
@@ -84,7 +92,7 @@ const HeroSlider = ({ films }) => {
       >
         <div className="flex max-w-2xl flex-col gap-[18px]">
           <p className="font-display text-[13px] font-bold tracking-[0.14em] text-mm-accent uppercase">
-            #{index + 1} trending film this week
+            #{film.rank ?? index + 1} trending {kind.noun} this week
           </p>
           <h1 className="font-display text-4xl leading-[1.02] font-extrabold tracking-tight text-balance text-mm-ink md:text-6xl">
             {film.title}
@@ -106,10 +114,10 @@ const HeroSlider = ({ films }) => {
             <Button size="lg" variant="light" onClick={playTrailer} disabled={loadingTrailer} icon={<FaPlay className="text-xs" />}>
               {loadingTrailer ? "Loading…" : "Play trailer"}
             </Button>
-            <Button size="lg" variant="secondary" to={`/film/${film.id}`} icon={<FiInfo />}>
+            <Button size="lg" variant="secondary" to={kind.page(film.id)} icon={<FiInfo />}>
               More info
             </Button>
-            <MyListButton type="film" id={film.id} variant="secondary" />
+            <MyListButton type={kind.noun} id={film.id} variant="secondary" />
           </div>
         </div>
       </div>
@@ -119,7 +127,7 @@ const HeroSlider = ({ films }) => {
           <button
             type="button"
             onClick={() => go(index - 1)}
-            aria-label="Previous film"
+            aria-label="Previous title"
             className="absolute top-1/2 left-4 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-2xl text-white hover:bg-black/60 md:flex"
           >
             <FiChevronLeft aria-hidden="true" />
@@ -127,7 +135,7 @@ const HeroSlider = ({ films }) => {
           <button
             type="button"
             onClick={() => go(index + 1)}
-            aria-label="Next film"
+            aria-label="Next title"
             className="absolute top-1/2 right-4 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-2xl text-white hover:bg-black/60 md:flex"
           >
             <FiChevronRight aria-hidden="true" />
@@ -135,7 +143,7 @@ const HeroSlider = ({ films }) => {
           <div className="absolute inset-x-0 bottom-8 flex justify-center gap-1">
             {films.map((f, i) => (
               <button
-                key={f.id}
+                key={`${f.type}-${f.id}`}
                 type="button"
                 onClick={() => go(i)}
                 aria-label={`Show ${f.title}`}
