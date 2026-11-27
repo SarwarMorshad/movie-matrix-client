@@ -1,0 +1,101 @@
+import { useRef, useState } from "react";
+import { Link } from "react-router";
+import { FaPlay } from "react-icons/fa";
+import TrailerModal from "../ui/TrailerModal";
+import MyListButton from "../common/MyListButton";
+import TrailerBackdrop from "./TrailerBackdrop";
+import useTitleDetails from "../../hooks/useTitleDetails";
+import { formatRating, formatRuntime } from "../../utils/format";
+
+const PAGES = { film: (id) => `/film/${id}`, series: (id) => `/tv/${id}` };
+
+// "Drama • 2024 • 2 Seasons • TV-MA"
+const metaLine = (item, details) =>
+  [
+    details?.genres?.[0],
+    item.year,
+    item.type === "series"
+      ? details?.numberOfSeasons && `${details.numberOfSeasons} ${details.numberOfSeasons === 1 ? "Season" : "Seasons"}`
+      : formatRuntime(details?.runtime),
+    details?.contentRating,
+  ].filter(Boolean);
+
+const Pill = ({ children }) => (
+  <span className="rounded-[4px] bg-black/70 px-2 py-1 text-[11px] font-semibold text-mm-ink backdrop-blur-sm">{children}</span>
+);
+
+/**
+ * The tile in a row that is being hovered, grown in place into a wide card
+ * (Netflix's current design): backdrop that turns into a muted trailer, white outline,
+ * the title's logo, small pills, then genre • year • length • age rating and the synopsis.
+ * MediaRow sizes it.
+ */
+const ExpandedTile = ({ item }) => {
+  const details = useTitleDetails(item.type, item.id);
+  const [trailerOpen, setTrailerOpen] = useState(false);
+  const backdropRef = useRef(null);
+  const page = PAGES[item.type](item.id);
+  const meta = metaLine(item, details);
+
+  const openTrailer = () => {
+    backdropRef.current?.pause();
+    setTrailerOpen(true);
+  };
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      <div className="relative aspect-video overflow-hidden rounded-lg bg-mm-raised motion-safe:animate-fadeIn">
+        <TrailerBackdrop ref={backdropRef} picture={item.backdropUrl || item.posterUrl} youtubeKey={details?.trailerKey} title={item.title} />
+
+        {/* The whole card opens the title page; the buttons sit above this link */}
+        <Link to={page} aria-label={`${item.title}, more info`} className="absolute inset-0" />
+        <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/80 to-transparent" />
+
+        <div className="pointer-events-none absolute right-3 bottom-3 left-4 flex items-end justify-between gap-3">
+          {details?.logoUrl ? (
+            <img src={details.logoUrl} alt={item.title} className="max-h-18 max-w-[55%] object-contain object-left-bottom drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" />
+          ) : (
+            <span className="line-clamp-2 max-w-[60%] font-display text-2xl leading-tight font-extrabold text-mm-ink drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
+              {item.title}
+            </span>
+          )}
+          <div className="pointer-events-auto flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+            <Pill>★ {formatRating(item.rating)}</Pill>
+            {details?.trailerKey && (
+              <button
+                type="button"
+                onClick={openTrailer}
+                aria-label={`Play ${item.title} trailer`}
+                title="Play trailer"
+                className="ml-1 flex size-9 items-center justify-center rounded-full bg-mm-ink text-sm text-mm-bg hover:bg-mm-ink/85"
+              >
+                <FaPlay aria-hidden="true" className="translate-x-px" />
+              </button>
+            )}
+            <MyListButton type={item.type} id={item.id} round />
+          </div>
+        </div>
+        {/* White outline, drawn over the picture so the row's edges can't clip it */}
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-lg border-2 border-mm-ink" />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        {meta.length > 0 && (
+          <p className="text-[13px] font-semibold text-mm-ink">
+            {meta.map((part, i) => (
+              <span key={part}>
+                {i > 0 && <span aria-hidden="true" className="px-1.5 text-mm-muted">•</span>}
+                {part}
+              </span>
+            ))}
+          </p>
+        )}
+        {item.overview && <p className="line-clamp-2 text-[13px] leading-snug text-mm-ink/80">{item.overview}</p>}
+      </div>
+
+      <TrailerModal youtubeKey={details?.trailerKey} title={item.title} open={trailerOpen} onClose={() => setTrailerOpen(false)} />
+    </div>
+  );
+};
+
+export default ExpandedTile;

@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { FiCheck, FiPlus } from "react-icons/fi";
 import * as api from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
-import { Button } from "../ui";
+import Button from "../ui/Button";
 
 // How to add / remove each kind of title
 const ACTIONS = {
