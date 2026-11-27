@@ -34,6 +34,7 @@ const Search = () => {
   const [text, setText] = useState(q);
   const typed = useDebounced(text.trim(), 350);
   const lastWritten = useRef(q);
+  const inputRef = useRef(null);
   const [state, setState] = useState({ status: "idle" });
 
   // Typing here updates ?q= (without filling the history with every letter)
@@ -97,6 +98,7 @@ const Search = () => {
           <FiSearch aria-hidden="true" className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-xl text-mm-muted" />
           <input
             id="page-search"
+            ref={inputRef}
             type="search"
             autoFocus={!q}
             value={text}
@@ -108,7 +110,10 @@ const Search = () => {
           {text && (
             <button
               type="button"
-              onClick={() => setText("")}
+              onClick={() => {
+                setText("");
+                inputRef.current?.focus(); // keep typing without clicking the box again
+              }}
               aria-label="Clear search"
               className="absolute top-1/2 right-3 flex size-8 -translate-y-1/2 items-center justify-center text-xl text-mm-muted hover:text-mm-ink"
             >
