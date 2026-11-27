@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import ExpandedTile from "../preview/ExpandedTile";
+import { prefetchTitleDetails } from "../../hooks/useTitleDetails";
 
 const OPEN_DELAY = 350; // ms resting on a tile before it grows
 const GROW_MS = 300; // matches the width transition below
@@ -27,6 +28,7 @@ const MediaRow = ({ id, title, items, renderItem, action, getKey = (item) => ite
   const hoverTile = (key, item) => {
     clearTimeout(timer.current);
     if (key === active || !canExpand(item) || !canHover()) return;
+    prefetchTitleDetails(item.type, item.id); // trailer id is ready by the time the tile has grown
     timer.current = setTimeout(() => setActive(key), OPEN_DELAY);
   };
 
