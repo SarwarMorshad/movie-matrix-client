@@ -1,8 +1,9 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { Link, NavLink, useLocation, useNavigate } from "react-router";
-import { FiChevronDown, FiFilm, FiHeart, FiLogOut, FiPlus, FiSearch, FiUser, FiX } from "react-icons/fi";
+import { Link, NavLink, useLocation } from "react-router";
+import { FiChevronDown, FiFilm, FiHeart, FiLogOut, FiPlus, FiUser } from "react-icons/fi";
 import { AuthContext } from "../../context/AuthContext";
 import Logo from "./Logo";
+import NavSearch from "./NavSearch";
 import { hasHero } from "../../utils/heroPages";
 
 // Netflix-style top bar: transparent over the home hero, solid once you scroll,
@@ -30,75 +31,6 @@ const useDismiss = (open, setOpen, ref) => {
       document.removeEventListener("keydown", close);
     };
   }, [open, setOpen, ref]);
-};
-
-// Search icon that opens into a box; Enter goes to All Movies with ?search=
-const ExpandingSearch = () => {
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
-
-  const submit = (e) => {
-    e.preventDefault();
-    const q = query.trim();
-    if (!q) return;
-    navigate(`/movies/community?search=${encodeURIComponent(q)}`); // members' movies until search covers everything
-  };
-
-  const close = () => {
-    setQuery("");
-    setOpen(false);
-  };
-
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Search movies"
-        className="flex size-10 items-center justify-center text-xl text-mm-ink hover:text-mm-accent"
-      >
-        <FiSearch aria-hidden="true" />
-      </button>
-    );
-  }
-
-  return (
-    <form
-      role="search"
-      onSubmit={submit}
-      onKeyDown={(e) => e.key === "Escape" && close()}
-      onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && !query && close()}
-      className="flex h-10 w-[min(70vw,260px)] items-center gap-2 border border-white/80 bg-black/80 px-2.5 motion-safe:animate-[searchOpen_200ms_ease-out]"
-    >
-      <FiSearch aria-hidden="true" className="shrink-0 text-lg text-mm-ink" />
-      <label htmlFor="nav-search" className="sr-only">
-        Search movies
-      </label>
-      <input
-        id="nav-search"
-        ref={inputRef}
-        type="search"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Titles, genres, people"
-        className="min-w-0 flex-1 bg-transparent text-sm text-mm-ink placeholder:text-mm-muted focus:outline-none [&::-webkit-search-cancel-button]:hidden"
-      />
-      <button
-        type="button"
-        onClick={close}
-        aria-label="Close search"
-        className="shrink-0 text-mm-muted hover:text-mm-ink"
-      >
-        <FiX aria-hidden="true" />
-      </button>
-    </form>
-  );
 };
 
 // "Browse" dropdown that replaces the links on small screens
@@ -275,7 +207,7 @@ const Navbar = () => {
         )}
 
         <div className="ml-auto flex items-center gap-3 sm:gap-5">
-          {!minimal && <ExpandingSearch />}
+          {!minimal && <NavSearch />}
           {user ? (
             <ProfileMenu user={user} onLogout={handleLogout} />
           ) : (
