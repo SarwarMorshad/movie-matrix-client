@@ -4,19 +4,17 @@ const SETTLE = 500; // ms of playback kept hidden, so YouTube's own start-up but
 
 const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-// Browsers only allow sound once the visitor has clicked / tapped / typed on the page;
-// before that, unmuting would make them pause the video, so it stays muted.
-const soundAllowed = () => navigator.userActivation?.hasBeenActive ?? false;
-
 // Sends a command to the YouTube player (needs enablejsapi=1)
 const ytCommand = (iframe, func, args = []) =>
   iframe?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args }), "*");
 
 /**
  * A still picture that turns into the title's trailer on its own, with no controls.
- * It starts muted (browsers require that for autoplay) and turns the sound on as it
- * appears, when the browser allows it. Fills its (relative, overflow-hidden) parent;
- * unmounting it stops the video.
+ * It starts muted (browsers require that for autoplay) and turns the sound on as it appears.
+ * Browsers allow that once the visitor has clicked / tapped / typed on the page (or on sites
+ * they often watch with sound); if the browser refuses and pauses it, it carries on muted,
+ * and the visitor's next click or key press turns the sound on. Fills its (relative,
+ * overflow-hidden) parent; unmounting it stops the video.
  *
  * <TrailerBackdrop picture={item.backdropUrl} youtubeKey={details?.trailerKey} title={item.title} />
  */
@@ -31,29 +29,48 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
     setStarted(Boolean(youtubeKey) && !reduceMotion());
   }, [youtubeKey]);
 
-  // Show the video (with sound) only once YouTube reports it is playing, plus a little
+  // Show the video only once YouTube reports it is playing (plus a little), then try sound
   useEffect(() => {
     if (!started) return;
     let timer;
+    let triedSoundAt = 0;
+    const soundOn = () => {
+      triedSoundAt = Date.now();
+      ytCommand(iframeRef.current, "unMute");
+      ytCommand(iframeRef.current, "setVolume", [100]);
+    };
+
     const onMessage = (e) => {
       if (e.source !== iframeRef.current?.contentWindow) return;
+      let state;
       try {
-        if (JSON.parse(e.data).info?.playerState === 1 && !timer) {
-          timer = setTimeout(() => {
-            if (soundAllowed()) {
-              ytCommand(iframeRef.current, "unMute");
-              ytCommand(iframeRef.current, "setVolume", [100]);
-            }
-            setVisible(true);
-          }, SETTLE);
-        }
+        state = JSON.parse(e.data).info?.playerState;
       } catch {
-        // not a YouTube message
+        return; // not a YouTube message
+      }
+      if (state === 1 && !timer) {
+        timer = setTimeout(() => {
+          soundOn();
+          setVisible(true);
+        }, SETTLE);
+      }
+      // The browser paused it because sound isn't allowed yet: keep playing, muted
+      if (state === 2 && Date.now() - triedSoundAt < 2000) {
+        ytCommand(iframeRef.current, "mute");
+        ytCommand(iframeRef.current, "playVideo");
       }
     };
+
+    // The visitor's first click or key press makes sound allowed: turn it on now
+    const onInteract = () => soundOn();
+
     window.addEventListener("message", onMessage);
+    document.addEventListener("pointerdown", onInteract, true);
+    document.addEventListener("keydown", onInteract, true);
     return () => {
       window.removeEventListener("message", onMessage);
+      document.removeEventListener("pointerdown", onInteract, true);
+      document.removeEventListener("keydown", onInteract, true);
       clearTimeout(timer);
     };
   }, [started]);
