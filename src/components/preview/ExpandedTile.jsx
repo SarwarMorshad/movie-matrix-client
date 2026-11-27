@@ -25,9 +25,10 @@ const Pill = ({ children }) => (
  * (Netflix's current design): backdrop that turns into a muted trailer by itself, white outline,
  * the title's logo and rating, then genre • year • length • age rating and the synopsis.
  * No buttons: the trailer plays while hovered and stops when the tile shrinks back.
- * Clicking it opens the title page. MediaRow sizes it.
+ * Clicking it opens the title page. MediaRow sizes it; `leaving` is set while it fades out
+ * as the tile shrinks back, which stops the trailer straight away.
  */
-const ExpandedTile = ({ item }) => {
+const ExpandedTile = ({ item, leaving = false }) => {
   const details = useTitleDetails(item.type, item.id);
   const page = PAGES[item.type](item.id);
   const meta = metaLine(item, details);
@@ -37,8 +38,8 @@ const ExpandedTile = ({ item }) => {
     // text below kept within ~58px (a normal tile's title + rating is 61px or more),
     // so the row never changes height
     <div className="flex w-[calc(var(--tile)*8/3)] flex-col gap-2">
-      <div className="relative h-[calc(var(--tile)*1.5)] overflow-hidden rounded-lg bg-mm-raised motion-safe:animate-fadeIn">
-        <TrailerBackdrop picture={item.backdropUrl || item.posterUrl} youtubeKey={details?.trailerKey} title={item.title} />
+      <div className="relative h-[calc(var(--tile)*1.5)] overflow-hidden rounded-lg bg-mm-raised">
+        <TrailerBackdrop picture={item.backdropUrl || item.posterUrl} youtubeKey={leaving ? null : details?.trailerKey} title={item.title} />
 
         {/* The whole card opens the title page */}
         <Link to={page} aria-label={`${item.title}, more info`} className="absolute inset-0" />
