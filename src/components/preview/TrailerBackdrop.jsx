@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-const SETTLE = 500; // ms of playback kept hidden, so YouTube's own start-up buttons are gone
+// The video appears, with its sound, the moment YouTube starts playing it.
+// (YouTube shows its own ⏸ button for the first few seconds; that is accepted
+// in exchange for an instant preview.)
 
 const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -29,10 +31,11 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
     setStarted(Boolean(youtubeKey) && !reduceMotion());
   }, [youtubeKey]);
 
-  // Show the video only once YouTube reports it is playing (plus a little), then try sound
+  // As soon as it starts playing: show it and turn the sound on
   useEffect(() => {
     if (!started) return;
-    let timer;
+    let playing = false;
+    let revealed = false;
     let triedSoundAt = 0;
     const soundOn = () => {
       triedSoundAt = Date.now();
@@ -42,17 +45,18 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
 
     const onMessage = (e) => {
       if (e.source !== iframeRef.current?.contentWindow) return;
-      let state;
+      let info;
       try {
-        state = JSON.parse(e.data).info?.playerState;
+        info = JSON.parse(e.data).info;
       } catch {
         return; // not a YouTube message
       }
-      if (state === 1 && !timer) {
-        timer = setTimeout(() => {
-          soundOn();
-          setVisible(true);
-        }, SETTLE);
+      const state = info?.playerState;
+      if (state === 1) playing = true;
+      if (playing && !revealed) {
+        revealed = true;
+        soundOn();
+        setVisible(true);
       }
       // The browser paused it because sound isn't allowed yet: keep playing, muted
       if (state === 2 && Date.now() - triedSoundAt < 2000) {
@@ -61,8 +65,8 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
       }
     };
 
-    // The visitor's first click or key press makes sound allowed: turn it on now
-    const onInteract = () => soundOn();
+    // The visitor's first click or key press makes sound allowed: turn it on (once it shows)
+    const onInteract = () => revealed && soundOn();
 
     window.addEventListener("message", onMessage);
     document.addEventListener("pointerdown", onInteract, true);
@@ -71,7 +75,6 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
       window.removeEventListener("message", onMessage);
       document.removeEventListener("pointerdown", onInteract, true);
       document.removeEventListener("keydown", onInteract, true);
-      clearTimeout(timer);
     };
   }, [started]);
 
@@ -83,12 +86,12 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
           ref={iframeRef}
           title={`${title} preview`}
           tabIndex={-1}
-          src={`https://www.youtube-nocookie.com/embed/${youtubeKey}?autoplay=1&mute=1&controls=0&loop=1&playlist=${youtubeKey}&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&enablejsapi=1`}
+          src={`https://www.youtube-nocookie.com/embed/${youtubeKey}?autoplay=1&mute=1&controls=0&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&enablejsapi=1`}
           allow="autoplay; encrypted-media"
           // Ask the player to report its state (handled above)
           onLoad={(e) => e.currentTarget.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: youtubeKey }), "*")}
           // Scaled up a little to push YouTube's title bar out of view
-          className={`pointer-events-none absolute inset-0 size-full scale-[1.3] border-0 transition-opacity duration-700 ${
+          className={`pointer-events-none absolute inset-0 size-full scale-[1.3] border-0 transition-opacity duration-300 ${
             visible ? "opacity-100" : "opacity-0"
           }`}
         />

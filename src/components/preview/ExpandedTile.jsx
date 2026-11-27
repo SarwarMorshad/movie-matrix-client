@@ -25,17 +25,21 @@ const Pill = ({ children }) => (
  * (Netflix's current design): backdrop that turns into a muted trailer by itself, white outline,
  * the title's logo and rating, then genre • year • length • age rating and the synopsis.
  * No buttons: the trailer plays while hovered and stops when the tile shrinks back.
- * Clicking it opens the title page. MediaRow sizes it.
+ * Clicking it opens the title page. MediaRow sizes it; `leaving` is set while it fades out
+ * as the tile shrinks back, which stops the trailer straight away.
  */
-const ExpandedTile = ({ item }) => {
+const ExpandedTile = ({ item, leaving = false }) => {
   const details = useTitleDetails(item.type, item.id);
   const page = PAGES[item.type](item.id);
   const meta = metaLine(item, details);
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <div className="relative aspect-video overflow-hidden rounded-lg bg-mm-raised motion-safe:animate-fadeIn">
-        <TrailerBackdrop picture={item.backdropUrl || item.posterUrl} youtubeKey={details?.trailerKey} title={item.title} />
+    // Full size from the first frame (MediaRow's <li> reveals it as it widens), and the
+    // text below kept within ~58px (a normal tile's title + rating is 61px or more),
+    // so the row never changes height
+    <div className="flex w-[calc(var(--tile)*8/3)] flex-col gap-2">
+      <div className="relative h-[calc(var(--tile)*1.5)] overflow-hidden rounded-lg bg-mm-raised">
+        <TrailerBackdrop picture={item.backdropUrl || item.posterUrl} youtubeKey={leaving ? null : details?.trailerKey} title={item.title} />
 
         {/* The whole card opens the title page */}
         <Link to={page} aria-label={`${item.title}, more info`} className="absolute inset-0" />
@@ -55,9 +59,9 @@ const ExpandedTile = ({ item }) => {
         <span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-lg border-2 border-mm-ink" />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-0.5">
         {meta.length > 0 && (
-          <p className="text-[13px] font-semibold text-mm-ink">
+          <p className="truncate text-[13px] leading-[18px] font-semibold text-mm-ink">
             {meta.map((part, i) => (
               <span key={part}>
                 {i > 0 && <span aria-hidden="true" className="px-1.5 text-mm-muted">•</span>}
@@ -66,7 +70,7 @@ const ExpandedTile = ({ item }) => {
             ))}
           </p>
         )}
-        {item.overview && <p className="line-clamp-2 text-[13px] leading-snug text-mm-ink/80">{item.overview}</p>}
+        {item.overview && <p className="line-clamp-2 text-xs leading-[15px] text-mm-ink/80">{item.overview}</p>}
       </div>
     </div>
   );
