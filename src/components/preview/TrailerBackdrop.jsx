@@ -1,28 +1,20 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { FiVolume2, FiVolumeX } from "react-icons/fi";
+import { useEffect, useRef, useState } from "react";
 
-const START_DELAY = 900; // ms on the still picture before the trailer starts
+const START_DELAY = 400; // ms on the still picture before the trailer starts
 const SETTLE = 1500; // ms of playback hidden, so YouTube's own start-up buttons are gone
 
 const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-// Sends a command to the YouTube player (needs enablejsapi=1)
-const ytCommand = (iframe, func) =>
-  iframe?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*");
-
 /**
- * A still picture that turns into the title's muted trailer, with a sound toggle.
- * Fills its (relative, overflow-hidden) parent. `ref.current.pause()` pauses the video.
+ * A still picture that turns into the title's muted trailer on its own, with no controls.
+ * Fills its (relative, overflow-hidden) parent; unmounting it stops the video.
  *
  * <TrailerBackdrop picture={item.backdropUrl} youtubeKey={details?.trailerKey} title={item.title} />
  */
-const TrailerBackdrop = forwardRef(({ picture, youtubeKey, title }, ref) => {
+const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
   const iframeRef = useRef(null);
   const [started, setStarted] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [muted, setMuted] = useState(true);
-
-  useImperativeHandle(ref, () => ({ pause: () => ytCommand(iframeRef.current, "pauseVideo") }), []);
 
   // Start after a moment on the still
   useEffect(() => {
@@ -52,12 +44,6 @@ const TrailerBackdrop = forwardRef(({ picture, youtubeKey, title }, ref) => {
     };
   }, [started]);
 
-  const toggleMute = (e) => {
-    e.preventDefault();
-    ytCommand(iframeRef.current, muted ? "unMute" : "mute");
-    setMuted(!muted);
-  };
-
   return (
     <>
       {picture && <img src={picture} alt="" className="absolute inset-0 size-full object-cover" />}
@@ -76,20 +62,8 @@ const TrailerBackdrop = forwardRef(({ picture, youtubeKey, title }, ref) => {
           }`}
         />
       )}
-      {visible && (
-        <button
-          type="button"
-          onClick={toggleMute}
-          aria-label={muted ? "Turn sound on" : "Turn sound off"}
-          className="absolute top-3 right-3 z-10 flex size-8 items-center justify-center rounded-full border border-white/50 bg-black/40 text-sm text-mm-ink hover:border-mm-ink"
-        >
-          {muted ? <FiVolumeX aria-hidden="true" /> : <FiVolume2 aria-hidden="true" />}
-        </button>
-      )}
     </>
   );
-});
-
-TrailerBackdrop.displayName = "TrailerBackdrop";
+};
 
 export default TrailerBackdrop;
