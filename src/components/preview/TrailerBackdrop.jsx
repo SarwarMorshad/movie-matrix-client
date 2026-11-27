@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-const START_DELAY = 400; // ms on the still picture before the trailer starts
-const SETTLE = 1500; // ms of playback hidden, so YouTube's own start-up buttons are gone
+const SETTLE = 500; // ms of playback kept hidden, so YouTube's own start-up buttons are gone
 
 const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -26,13 +25,10 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
   const [started, setStarted] = useState(false);
   const [visible, setVisible] = useState(false);
 
-  // Start after a moment on the still
+  // Start loading the player straight away (the still shows until it plays)
   useEffect(() => {
-    setStarted(false);
     setVisible(false);
-    if (!youtubeKey || reduceMotion()) return;
-    const timer = setTimeout(() => setStarted(true), START_DELAY);
-    return () => clearTimeout(timer);
+    setStarted(Boolean(youtubeKey) && !reduceMotion());
   }, [youtubeKey]);
 
   // Show the video (with sound) only once YouTube reports it is playing, plus a little
