@@ -5,7 +5,7 @@ import ExpandedTile from "../preview/ExpandedTile";
 import { prefetchTitleDetails } from "../../hooks/useTitleDetails";
 
 const OPEN_DELAY = 350; // ms resting on a tile before it grows
-const GROW_MS = 300; // matches the width transition below
+const RESIZE_MS = 500; // grow / shrink time; matches duration-500 on the <li> below
 
 // Films and series from TMDB can grow into a trailer card; members' movies can't
 const canExpand = (item) => item?.type === "film" || item?.type === "series";
@@ -22,22 +22,44 @@ const canHover = () => window.matchMedia("(hover: hover) and (pointer: fine)").m
 const MediaRow = ({ id, title, items, renderItem, action, getKey = (item) => item.id ?? item._id }) => {
   const rowRef = useRef(null);
   const timer = useRef(null);
+  const closeTimer = useRef(null);
+  const activeRef = useRef(null);
   const [active, setActive] = useState(null); // key of the grown tile
+  const [closing, setClosing] = useState(null); // key of the tile shrinking back, while it animates
   const scroll = (dir) => rowRef.current?.scrollBy({ left: dir * rowRef.current.clientWidth * 0.85, behavior: "smooth" });
+
+  // Grow `key` (or none); the tile that was grown keeps its wide card while it shrinks back
+  const show = (key) => {
+    const previous = activeRef.current;
+    if (previous === key) return;
+    activeRef.current = key;
+    setActive(key);
+    if (previous !== null) {
+      setClosing(previous);
+      clearTimeout(closeTimer.current);
+      closeTimer.current = setTimeout(() => setClosing(null), RESIZE_MS);
+    }
+  };
 
   const hoverTile = (key, item) => {
     clearTimeout(timer.current);
-    if (key === active || !canExpand(item) || !canHover()) return;
+    if (key === activeRef.current || !canExpand(item) || !canHover()) return;
     prefetchTitleDetails(item.type, item.id); // trailer id is ready by the time the tile has grown
-    timer.current = setTimeout(() => setActive(key), OPEN_DELAY);
+    timer.current = setTimeout(() => show(key), OPEN_DELAY);
   };
 
   const leaveRow = () => {
     clearTimeout(timer.current);
-    setActive(null);
+    show(null);
   };
 
-  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(
+    () => () => {
+      clearTimeout(timer.current);
+      clearTimeout(closeTimer.current);
+    },
+    []
+  );
 
   // Once the tile has grown, scroll the row if its right side is cut off
   useEffect(() => {
@@ -48,7 +70,7 @@ const MediaRow = ({ id, title, items, renderItem, action, getKey = (item) => ite
       if (!row || !tile) return;
       const overflow = tile.getBoundingClientRect().right - row.getBoundingClientRect().right;
       if (overflow > 0) row.scrollBy({ left: overflow + 4, behavior: "smooth" });
-    }, GROW_MS + 20);
+    }, RESIZE_MS + 20);
     return () => clearTimeout(t);
   }, [active]);
 
@@ -88,18 +110,31 @@ const MediaRow = ({ id, title, items, renderItem, action, getKey = (item) => ite
           {items.map((item) => {
             const key = getKey(item);
             const isActive = key === active;
+            const isClosing = key === closing && !isActive;
             return (
+              // The width eases between poster and wide card, so the tiles after it glide
+              // along both ways; the poster and the wide card cross-fade on top of each other.
               <li
                 key={key}
                 data-active={isActive}
                 onMouseEnter={() => hoverTile(key, item)}
-                className={`shrink-0 snap-start transition-[width] duration-300 ease-out motion-reduce:transition-none ${
-                  isActive ? "w-[calc(var(--tile)*8/3)] overflow-hidden" : "w-(--tile)" // clip the wide card while it opens
-                }`}
+                className={`relative shrink-0 snap-start transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                  isActive ? "w-[calc(var(--tile)*8/3)]" : "w-(--tile)"
+                } ${isActive || isClosing ? "overflow-hidden" : ""}`}
               >
-                {/* A normal tile keeps the poster width even while its <li> is still shrinking back,
-                    so the poster never stretches and the rows below don't jump */}
-                {isActive ? <ExpandedTile item={item} /> : <div className="w-(--tile)">{renderItem(item)}</div>}
+                {/* The poster keeps its width the whole time, so it never stretches and the row keeps its height */}
+                <div inert={isActive} className={`w-(--tile) transition-opacity duration-300 ${isActive ? "opacity-0" : "opacity-100"}`}>
+                  {renderItem(item)}
+                </div>
+                {(isActive || isClosing) && (
+                  <div
+                    className={`absolute top-0 left-0 ${
+                      isActive ? "motion-safe:animate-[tileFadeIn_300ms_ease-out]" : "opacity-0 transition-opacity duration-300"
+                    }`}
+                  >
+                    <ExpandedTile item={item} leaving={isClosing} />
+                  </div>
+                )}
               </li>
             );
           })}
