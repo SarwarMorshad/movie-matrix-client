@@ -1,8 +1,4 @@
-import { useRef, useState } from "react";
 import { Link } from "react-router";
-import { FaPlay } from "react-icons/fa";
-import TrailerModal from "../ui/TrailerModal";
-import MyListButton from "../common/MyListButton";
 import TrailerBackdrop from "./TrailerBackdrop";
 import useTitleDetails from "../../hooks/useTitleDetails";
 import { formatRating, formatRuntime } from "../../utils/format";
@@ -26,28 +22,22 @@ const Pill = ({ children }) => (
 
 /**
  * The tile in a row that is being hovered, grown in place into a wide card
- * (Netflix's current design): backdrop that turns into a muted trailer, white outline,
- * the title's logo, small pills, then genre • year • length • age rating and the synopsis.
- * MediaRow sizes it.
+ * (Netflix's current design): backdrop that turns into a muted trailer by itself, white outline,
+ * the title's logo and rating, then genre • year • length • age rating and the synopsis.
+ * No buttons: the trailer plays while hovered and stops when the tile shrinks back.
+ * Clicking it opens the title page. MediaRow sizes it.
  */
 const ExpandedTile = ({ item }) => {
   const details = useTitleDetails(item.type, item.id);
-  const [trailerOpen, setTrailerOpen] = useState(false);
-  const backdropRef = useRef(null);
   const page = PAGES[item.type](item.id);
   const meta = metaLine(item, details);
-
-  const openTrailer = () => {
-    backdropRef.current?.pause();
-    setTrailerOpen(true);
-  };
 
   return (
     <div className="flex flex-col gap-2.5">
       <div className="relative aspect-video overflow-hidden rounded-lg bg-mm-raised motion-safe:animate-fadeIn">
-        <TrailerBackdrop ref={backdropRef} picture={item.backdropUrl || item.posterUrl} youtubeKey={details?.trailerKey} title={item.title} />
+        <TrailerBackdrop picture={item.backdropUrl || item.posterUrl} youtubeKey={details?.trailerKey} title={item.title} />
 
-        {/* The whole card opens the title page; the buttons sit above this link */}
+        {/* The whole card opens the title page */}
         <Link to={page} aria-label={`${item.title}, more info`} className="absolute inset-0" />
         <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/80 to-transparent" />
 
@@ -59,21 +49,7 @@ const ExpandedTile = ({ item }) => {
               {item.title}
             </span>
           )}
-          <div className="pointer-events-auto flex shrink-0 flex-wrap items-center justify-end gap-1.5">
-            <Pill>★ {formatRating(item.rating)}</Pill>
-            {details?.trailerKey && (
-              <button
-                type="button"
-                onClick={openTrailer}
-                aria-label={`Play ${item.title} trailer`}
-                title="Play trailer"
-                className="ml-1 flex size-9 items-center justify-center rounded-full bg-mm-ink text-sm text-mm-bg hover:bg-mm-ink/85"
-              >
-                <FaPlay aria-hidden="true" className="translate-x-px" />
-              </button>
-            )}
-            <MyListButton type={item.type} id={item.id} round />
-          </div>
+          <Pill>★ {formatRating(item.rating)}</Pill>
         </div>
         {/* White outline, drawn over the picture so the row's edges can't clip it */}
         <span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-lg border-2 border-mm-ink" />
@@ -92,8 +68,6 @@ const ExpandedTile = ({ item }) => {
         )}
         {item.overview && <p className="line-clamp-2 text-[13px] leading-snug text-mm-ink/80">{item.overview}</p>}
       </div>
-
-      <TrailerModal youtubeKey={details?.trailerKey} title={item.title} open={trailerOpen} onClose={() => setTrailerOpen(false)} />
     </div>
   );
 };
