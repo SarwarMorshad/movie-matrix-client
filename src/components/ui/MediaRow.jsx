@@ -4,7 +4,7 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import ExpandedTile from "../preview/ExpandedTile";
 import { prefetchTitleDetails } from "../../hooks/useTitleDetails";
 
-const OPEN_DELAY = 350; // ms resting on a tile before it grows
+const OPEN_DELAY = 200; // ms resting on a tile before it grows (skips tiles the mouse just passes over)
 const RESIZE_MS = 800; // grow / shrink time; matches duration-800 on the <li> below
 
 // Films and series from TMDB can grow into a trailer card; members' movies can't
