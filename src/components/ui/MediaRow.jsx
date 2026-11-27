@@ -94,10 +94,12 @@ const MediaRow = ({ id, title, items, renderItem, action, getKey = (item) => ite
                 data-active={isActive}
                 onMouseEnter={() => hoverTile(key, item)}
                 className={`shrink-0 snap-start transition-[width] duration-300 ease-out motion-reduce:transition-none ${
-                  isActive ? "w-[calc(var(--tile)*8/3)]" : "w-(--tile)"
+                  isActive ? "w-[calc(var(--tile)*8/3)] overflow-hidden" : "w-(--tile)" // clip the wide card while it opens
                 }`}
               >
-                {isActive ? <ExpandedTile item={item} /> : renderItem(item)}
+                {/* A normal tile keeps the poster width even while its <li> is still shrinking back,
+                    so the poster never stretches and the rows below don't jump */}
+                {isActive ? <ExpandedTile item={item} /> : <div className="w-(--tile)">{renderItem(item)}</div>}
               </li>
             );
           })}
