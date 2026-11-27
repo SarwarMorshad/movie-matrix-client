@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-// YouTube shows its own ⏮ ⏸ ⏭ buttons and channel name for ~1.5s when playback starts
-// and again whenever the sound changes. So the sound goes on as soon as it plays, while
-// the video is still hidden, and the video appears once those buttons have gone.
-const HIDE_MS = 1600;
+// YouTube shows its own big ⏸ button and channel name for the first ~4s of playback
+// (measured: still there at 3.4s, gone by 4.2s). The video stays hidden behind the still
+// until it has played that long, and the sound goes on while it's still hidden.
+const REVEAL_AT = 4; // seconds of playback
 
 const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -35,8 +35,8 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
   // Sound on when it starts playing (still hidden), then show it once YouTube's buttons are gone
   useEffect(() => {
     if (!started) return;
-    let playingSince = 0;
-    let timer;
+    let playing = false;
+    let revealed = false;
     let triedSoundAt = 0;
     const soundOn = () => {
       triedSoundAt = Date.now();
@@ -53,10 +53,13 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
         return; // not a YouTube message
       }
       const state = info?.playerState;
-      if (state === 1 && !playingSince) {
-        playingSince = Date.now();
+      if (state === 1 && !playing) {
+        playing = true;
         soundOn();
-        timer = setTimeout(() => setVisible(true), HIDE_MS);
+      }
+      if (!revealed && info?.currentTime >= REVEAL_AT) {
+        revealed = true;
+        setVisible(true);
       }
       // The browser paused it because sound isn't allowed yet: keep playing, muted
       if (state === 2 && Date.now() - triedSoundAt < 2000) {
@@ -75,7 +78,6 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
       window.removeEventListener("message", onMessage);
       document.removeEventListener("pointerdown", onInteract, true);
       document.removeEventListener("keydown", onInteract, true);
-      clearTimeout(timer);
     };
   }, [started]);
 
