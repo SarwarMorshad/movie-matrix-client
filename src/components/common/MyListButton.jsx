@@ -20,9 +20,8 @@ const ACTIONS = {
  * <MyListButton type="movie" id={movie._id} />
  * <MyListButton type="series" id={series.id} />
  * <MyListButton type="film" id={film.id} />
- * <MyListButton type="film" id={film.id} round />   // icon-only circle, for hover previews
  */
-const MyListButton = ({ type, id, size = "lg", variant, round = false }) => {
+const MyListButton = ({ type, id, size = "lg", variant }) => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -64,22 +63,6 @@ const MyListButton = ({ type, id, size = "lg", variant, round = false }) => {
       setBusy(false);
     }
   };
-
-  if (round) {
-    return (
-      <button
-        type="button"
-        onClick={toggle}
-        disabled={busy}
-        aria-pressed={inList}
-        aria-label={inList ? "Remove from My List" : "Add to My List"}
-        title={inList ? "Remove from My List" : "Add to My List"}
-        className="flex size-9 shrink-0 items-center justify-center rounded-full border-2 border-white/50 bg-black/40 text-lg text-mm-ink transition-colors hover:border-mm-ink disabled:opacity-50"
-      >
-        {inList ? <FiCheck aria-hidden="true" /> : <FiPlus aria-hidden="true" />}
-      </button>
-    );
-  }
 
   return (
     <Button
