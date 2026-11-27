@@ -5,7 +5,7 @@ import ExpandedTile from "../preview/ExpandedTile";
 import { prefetchTitleDetails } from "../../hooks/useTitleDetails";
 
 const OPEN_DELAY = 350; // ms resting on a tile before it grows
-const RESIZE_MS = 500; // grow / shrink time; matches duration-500 on the <li> below
+const RESIZE_MS = 800; // grow / shrink time; matches duration-800 on the <li> below
 
 // Films and series from TMDB can grow into a trailer card; members' movies can't
 const canExpand = (item) => item?.type === "film" || item?.type === "series";
@@ -118,18 +118,18 @@ const MediaRow = ({ id, title, items, renderItem, action, getKey = (item) => ite
                 key={key}
                 data-active={isActive}
                 onMouseEnter={() => hoverTile(key, item)}
-                className={`relative shrink-0 snap-start transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                className={`relative shrink-0 snap-start transition-[width] duration-800 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none ${
                   isActive ? "w-[calc(var(--tile)*8/3)]" : "w-(--tile)"
                 } ${isActive || isClosing ? "overflow-hidden" : ""}`}
               >
                 {/* The poster keeps its width the whole time, so it never stretches and the row keeps its height */}
-                <div inert={isActive} className={`w-(--tile) transition-opacity duration-300 ${isActive ? "opacity-0" : "opacity-100"}`}>
+                <div inert={isActive} className={`w-(--tile) transition-opacity duration-500 ${isActive ? "opacity-0" : "opacity-100"}`}>
                   {renderItem(item)}
                 </div>
                 {(isActive || isClosing) && (
                   <div
                     className={`absolute top-0 left-0 ${
-                      isActive ? "motion-safe:animate-[tileFadeIn_300ms_ease-out]" : "opacity-0 transition-opacity duration-300"
+                      isActive ? "motion-safe:animate-[tileFadeIn_500ms_ease-out]" : "opacity-0 transition-opacity duration-500"
                     }`}
                   >
                     <ExpandedTile item={item} leaving={isClosing} />
