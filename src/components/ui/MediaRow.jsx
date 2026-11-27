@@ -28,17 +28,18 @@ const MediaRow = ({ id, title, items, renderItem, action, getKey = (item) => ite
           </Link>
         )}
       </div>
-      <div className="relative">
+      {/* The row keeps the page margin on both sides; cards scroll inside it */}
+      <div className="relative mx-4 sm:mx-8 lg:mx-14">
         <button type="button" onClick={() => scroll(-1)} aria-label={`Scroll ${title} left`} className={`${arrow} left-2`}>
           <FiChevronLeft aria-hidden="true" />
         </button>
         {/* [contain:paint] stops the cards from widening the page on phones */}
         <ul
           ref={rowRef}
-          className="flex snap-x gap-3 overflow-x-auto scroll-smooth px-4 pb-2 [contain:paint] sm:px-8 lg:px-14 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex snap-x gap-4 overflow-x-auto scroll-smooth pb-2 [contain:paint] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item) => (
-            <li key={getKey(item)} className="w-[140px] shrink-0 snap-start sm:w-[160px] lg:w-[180px]">
+            <li key={getKey(item)} className="w-[160px] shrink-0 snap-start sm:w-[190px] lg:w-[220px] 2xl:w-[240px]">
               {renderItem(item)}
             </li>
           ))}

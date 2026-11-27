@@ -79,6 +79,11 @@ export const getFilm = (id) => data(api.get(`/films/${id}`));
 export const getFilmGenres = () => data(api.get("/films/genres")); // [{ id, name }]
 export const discoverFilms = (params) => data(api.get("/films/discover", { params })); // { genre, sort, page }
 
+// ---------- Search (films + series from TMDB, and members' movies) ----------
+// -> { query, results, members, page, totalPages, total }
+export const search = (q, { type = "all", page = 1 } = {}, config) =>
+  data(api.get("/search", { params: { q, type, page }, ...config })); // type: all | film | series; config e.g. { signal }
+
 // ---------- Users ----------
 export const saveUser = (user) => data(api.post("/users", user));
 export const getMe = () => data(api.get("/users/me")); // includes role and plan

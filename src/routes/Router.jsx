@@ -18,6 +18,7 @@ import PrivateRoute from "./PrivateRoute";
 import Profile from "../pages/Profile";
 import Plans from "../pages/Plans";
 import FilmDetails from "../pages/FilmDetails";
+import Search from "../pages/Search";
 
 const router = createBrowserRouter([
   {
@@ -117,6 +118,10 @@ const router = createBrowserRouter([
       {
         path: "/plans",
         element: <Plans />,
+      },
+      {
+        path: "/search",
+        element: <Search />,
       },
     ],
   },
