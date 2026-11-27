@@ -71,18 +71,6 @@
 }
 
 /* Navbar search box opening from the icon */
-/* Hover preview card growing out of its tile (--preview-from = tile width / card width) */
-@keyframes previewIn {
-  from {
-    transform: scale(var(--preview-from, 0.7));
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
 @keyframes searchOpen {
   from {
     width: 40px;
