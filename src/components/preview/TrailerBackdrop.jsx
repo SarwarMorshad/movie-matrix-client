@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
 // YouTube shows its own big ⏸ button and channel name for the first ~4s of playback
-// (measured: still there at 3.4s, gone by 4.2s). The video stays hidden behind the still
-// until it has played that long, and the sound goes on while it's still hidden.
+// (measured: still there at 3.4s, gone by 4.2s). The video plays hidden and muted behind
+// the still until then; picture and sound come in together when it appears.
 const REVEAL_AT = 4; // seconds of playback
 
 const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -53,12 +53,10 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
         return; // not a YouTube message
       }
       const state = info?.playerState;
-      if (state === 1 && !playing) {
-        playing = true;
-        soundOn();
-      }
-      if (!revealed && info?.currentTime >= REVEAL_AT) {
+      if (state === 1) playing = true;
+      if (playing && !revealed && info?.currentTime >= REVEAL_AT) {
         revealed = true;
+        soundOn();
         setVisible(true);
       }
       // The browser paused it because sound isn't allowed yet: keep playing, muted
@@ -68,8 +66,8 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
       }
     };
 
-    // The visitor's first click or key press makes sound allowed: turn it on now
-    const onInteract = () => soundOn();
+    // The visitor's first click or key press makes sound allowed: turn it on (once it shows)
+    const onInteract = () => revealed && soundOn();
 
     window.addEventListener("message", onMessage);
     document.addEventListener("pointerdown", onInteract, true);
