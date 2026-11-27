@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-const SETTLE = 500; // ms of playback kept hidden, so YouTube's own start-up buttons are gone
+// YouTube shows its own ⏮ ⏸ ⏭ buttons and channel name for ~1.5s when playback starts
+// and again whenever the sound changes. So the sound goes on as soon as it plays, while
+// the video is still hidden, and the video appears once those buttons have gone.
+const HIDE_MS = 1600;
 
 const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -29,9 +32,10 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
     setStarted(Boolean(youtubeKey) && !reduceMotion());
   }, [youtubeKey]);
 
-  // Show the video only once YouTube reports it is playing (plus a little), then try sound
+  // Sound on when it starts playing (still hidden), then show it once YouTube's buttons are gone
   useEffect(() => {
     if (!started) return;
+    let playingSince = 0;
     let timer;
     let triedSoundAt = 0;
     const soundOn = () => {
@@ -42,17 +46,17 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
 
     const onMessage = (e) => {
       if (e.source !== iframeRef.current?.contentWindow) return;
-      let state;
+      let info;
       try {
-        state = JSON.parse(e.data).info?.playerState;
+        info = JSON.parse(e.data).info;
       } catch {
         return; // not a YouTube message
       }
-      if (state === 1 && !timer) {
-        timer = setTimeout(() => {
-          soundOn();
-          setVisible(true);
-        }, SETTLE);
+      const state = info?.playerState;
+      if (state === 1 && !playingSince) {
+        playingSince = Date.now();
+        soundOn();
+        timer = setTimeout(() => setVisible(true), HIDE_MS);
       }
       // The browser paused it because sound isn't allowed yet: keep playing, muted
       if (state === 2 && Date.now() - triedSoundAt < 2000) {
@@ -83,7 +87,7 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
           ref={iframeRef}
           title={`${title} preview`}
           tabIndex={-1}
-          src={`https://www.youtube-nocookie.com/embed/${youtubeKey}?autoplay=1&mute=1&controls=0&loop=1&playlist=${youtubeKey}&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&enablejsapi=1`}
+          src={`https://www.youtube-nocookie.com/embed/${youtubeKey}?autoplay=1&mute=1&controls=0&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&enablejsapi=1`}
           allow="autoplay; encrypted-media"
           // Ask the player to report its state (handled above)
           onLoad={(e) => e.currentTarget.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: youtubeKey }), "*")}
