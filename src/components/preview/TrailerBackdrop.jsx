@@ -5,9 +5,19 @@ const SETTLE = 1500; // ms of playback hidden, so YouTube's own start-up buttons
 
 const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// Browsers only allow sound once the visitor has clicked / tapped / typed on the page;
+// before that, unmuting would make them pause the video, so it stays muted.
+const soundAllowed = () => navigator.userActivation?.hasBeenActive ?? false;
+
+// Sends a command to the YouTube player (needs enablejsapi=1)
+const ytCommand = (iframe, func, args = []) =>
+  iframe?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args }), "*");
+
 /**
- * A still picture that turns into the title's muted trailer on its own, with no controls.
- * Fills its (relative, overflow-hidden) parent; unmounting it stops the video.
+ * A still picture that turns into the title's trailer on its own, with no controls.
+ * It starts muted (browsers require that for autoplay) and turns the sound on as it
+ * appears, when the browser allows it. Fills its (relative, overflow-hidden) parent;
+ * unmounting it stops the video.
  *
  * <TrailerBackdrop picture={item.backdropUrl} youtubeKey={details?.trailerKey} title={item.title} />
  */
@@ -25,14 +35,22 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
     return () => clearTimeout(timer);
   }, [youtubeKey]);
 
-  // Show the video only once YouTube reports it is playing, plus a little
+  // Show the video (with sound) only once YouTube reports it is playing, plus a little
   useEffect(() => {
     if (!started) return;
     let timer;
     const onMessage = (e) => {
       if (e.source !== iframeRef.current?.contentWindow) return;
       try {
-        if (JSON.parse(e.data).info?.playerState === 1 && !timer) timer = setTimeout(() => setVisible(true), SETTLE);
+        if (JSON.parse(e.data).info?.playerState === 1 && !timer) {
+          timer = setTimeout(() => {
+            if (soundAllowed()) {
+              ytCommand(iframeRef.current, "unMute");
+              ytCommand(iframeRef.current, "setVolume", [100]);
+            }
+            setVisible(true);
+          }, SETTLE);
+        }
       } catch {
         // not a YouTube message
       }
