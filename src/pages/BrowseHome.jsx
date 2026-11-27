@@ -16,7 +16,7 @@ const SEE_MEMBERS = { label: "See all", to: "/movies/community" };
 // with the members' own movies in between. `load` returns the row's items.
 const ROWS = [
   { id: "films-trending", title: "Trending movies this week", load: () => api.getFilmList("trending"), renderItem: filmCard, skipHero: true },
-  { id: "tv-trending", title: "Trending TV shows", load: () => api.getTvList("trending"), renderItem: seriesCard, action: { label: "See all", to: "/tv" } },
+  { id: "tv-trending", title: "Trending TV shows", load: () => api.getTvList("trending"), renderItem: seriesCard, skipHero: true, action: { label: "See all", to: "/tv" } },
   { id: "films-popular", title: "Popular movies", load: () => api.getFilmList("popular"), renderItem: filmCard, action: { label: "See all", to: "/movies" } },
   { id: "tv-popular", title: "Popular TV shows", load: () => api.getTvList("popular"), renderItem: seriesCard },
   { id: "members-top", title: "Top rated by our members", load: () => api.getTopRatedMovies(20), renderItem: memberCard, getKey: memberKey, action: SEE_MEMBERS },
@@ -31,7 +31,20 @@ const ROWS = [
 // TMDB lists come as { results }, the members' lists as plain arrays
 const itemsOf = (value) => (Array.isArray(value) ? value : value?.results || []);
 
-// Home page for signed-in members: trending films hero, then Netflix-style rows
+// Hero slides: the top 3 trending films and top 3 trending series that have a backdrop,
+// taking turns (film, series, film, …), each keeping its place in its own trending list
+const HERO_EACH = 3;
+const pickHero = (films = [], series = []) => {
+  const top = (list) =>
+    list
+      .map((item, i) => ({ ...item, rank: i + 1 }))
+      .filter((item) => item.backdropUrl)
+      .slice(0, HERO_EACH);
+  const [f, s] = [top(films), top(series)];
+  return Array.from({ length: HERO_EACH }, (_, i) => [f[i], s[i]]).flat().filter(Boolean);
+};
+
+// Home page for signed-in members: trending films and series hero, then Netflix-style rows
 // of movies, TV shows and the community's own movies
 const BrowseHome = () => {
   const [loading, setLoading] = useState(true);
@@ -52,8 +65,8 @@ const BrowseHome = () => {
 
   if (loading) return <Spinner fullPage label="Loading movies and TV shows" />;
 
-  const heroFilms = (items["films-trending"] || []).filter((f) => f.backdropUrl).slice(0, 5);
-  const heroIds = new Set(heroFilms.map((f) => f.id));
+  const hero = pickHero(items["films-trending"], items["tv-trending"]);
+  const inHero = new Set(hero.map((h) => `${h.type}-${h.id}`));
 
   return (
     <>
@@ -63,7 +76,7 @@ const BrowseHome = () => {
       </Helmet>
 
       {/* Without TMDB there's no hero, so keep the page clear of the fixed navbar */}
-      {heroFilms.length ? <HeroSlider films={heroFilms} /> : <div className="pt-24" />}
+      {hero.length ? <HeroSlider items={hero} /> : <div className="pt-24" />}
 
       {/* Every section is a row right under the hero, Netflix style */}
       <div className="relative z-10 -mt-10 flex flex-col gap-10 pb-16">
@@ -72,7 +85,7 @@ const BrowseHome = () => {
             key={row.id}
             id={row.id}
             title={row.title}
-            items={row.skipHero ? (items[row.id] || []).filter((f) => !heroIds.has(f.id)) : items[row.id]}
+            items={row.skipHero ? (items[row.id] || []).filter((t) => !inHero.has(`${t.type}-${t.id}`)) : items[row.id]}
             renderItem={row.renderItem}
             getKey={row.getKey}
             action={row.action}
