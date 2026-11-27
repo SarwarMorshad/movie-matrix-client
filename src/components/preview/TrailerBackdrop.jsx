@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-// YouTube shows its own big ⏸ button and channel name for the first ~4s of playback
-// (measured: still there at 3.4s, gone by 4.2s). The video plays hidden and muted behind
-// the still until then; picture and sound come in together when it appears.
-const REVEAL_AT = 4; // seconds of playback
+// The video appears, with its sound, the moment YouTube starts playing it.
+// (YouTube shows its own ⏸ button for the first few seconds; that is accepted
+// in exchange for an instant preview.)
 
 const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -32,7 +31,7 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
     setStarted(Boolean(youtubeKey) && !reduceMotion());
   }, [youtubeKey]);
 
-  // Sound on when it starts playing (still hidden), then show it once YouTube's buttons are gone
+  // As soon as it starts playing: show it and turn the sound on
   useEffect(() => {
     if (!started) return;
     let playing = false;
@@ -54,7 +53,7 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
       }
       const state = info?.playerState;
       if (state === 1) playing = true;
-      if (playing && !revealed && info?.currentTime >= REVEAL_AT) {
+      if (playing && !revealed) {
         revealed = true;
         soundOn();
         setVisible(true);
@@ -92,7 +91,7 @@ const TrailerBackdrop = ({ picture, youtubeKey, title }) => {
           // Ask the player to report its state (handled above)
           onLoad={(e) => e.currentTarget.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: youtubeKey }), "*")}
           // Scaled up a little to push YouTube's title bar out of view
-          className={`pointer-events-none absolute inset-0 size-full scale-[1.3] border-0 transition-opacity duration-700 ${
+          className={`pointer-events-none absolute inset-0 size-full scale-[1.3] border-0 transition-opacity duration-300 ${
             visible ? "opacity-100" : "opacity-0"
           }`}
         />
